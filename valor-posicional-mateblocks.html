@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+<title>MateBlocks — Valor Posicional</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #ede0c4;
+    --paper-2: #d9c8a4;
+    --ink: #1a120a;
+    --wood-1: #8b5a2b;
+    --wood-2: #5c3a1a;
+    --wood-3: #3d2410;
+    --wood-light: #c89968;
+    --gold: #b8893f;
+    --accent: #a02818;
+    --accent-2: #d94a2c;
+    --green: #4a7048;
+    --green-light: #7da97a;
+    --blue: #2c5282;
+    --blue-light: #4a7ab0;
+    --purple: #6b3c5c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    overscroll-behavior: none;
+    touch-action: manipulation;
+    height: 100%;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background:
+      radial-gradient(ellipse at 30% 0%, #6b4226 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 100%, #2a1810 0%, transparent 50%),
+      linear-gradient(135deg, #4a2c14, #2a1808 60%, #150a04);
+    background-attachment: fixed;
+    color: var(--paper);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.55) 100%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    pointer-events: none;
+    z-index: 0;
+    mix-blend-mode: multiply;
+  }
+
+  header {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 4px 4px 12px;
+    z-index: 1;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: var(--paper);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .logo span { color: var(--accent-2); }
+
+  .module-name {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--wood-light);
+    font-weight: 500;
+    opacity: 0.85;
+  }
+
+  
+  
+  
+  
+
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background:
+      linear-gradient(180deg, rgba(237, 224, 196, 0.97), rgba(217, 200, 164, 0.97));
+    border: 1px solid rgba(74, 40, 16, 0.3);
+    border-radius: 22px;
+    padding: 16px 14px 14px;
+    box-shadow:
+      0 12px 28px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.6);
+    z-index: 1;
+    position: relative;
+  }
+
+  .target-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--wood-2);
+    text-align: center;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  .target-number {
+    font-family: 'Fraunces', serif;
+    font-size: 56px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+  }
+
+  .target-words {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 16px;
+    color: var(--wood-2);
+    text-align: center;
+    margin-bottom: 14px;
+    opacity: 0.85;
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .column {
+    background:
+      linear-gradient(180deg, #5c3a1a 0%, #3d2410 100%);
+    border-radius: 14px;
+    padding: 8px 6px 6px;
+    min-height: 170px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow:
+      inset 0 2px 6px rgba(0,0,0,0.6),
+      inset 0 -1px 0 rgba(255,255,255,0.05);
+    overflow: hidden;
+  }
+
+  .column::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='200'><filter id='w'><feTurbulence type='turbulence' baseFrequency='0.02 0.5' numOctaves='2' seed='3'/><feColorMatrix values='0 0 0 0 0.15 0 0 0 0 0.08 0 0 0 0 0.03 0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23w)'/></svg>");
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .column-header {
+    font-family: 'Fraunces', serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--paper);
+    margin-bottom: 2px;
+    z-index: 2;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  }
+
+  .column-count {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 8px;
+    z-index: 2;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    min-height: 26px;
+  }
+
+  .column-blocks {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap-reverse;
+    flex-direction: row;
+    justify-content: center;
+    align-content: flex-start;
+    gap: 4px;
+    padding: 0 4px 4px;
+    z-index: 2;
+    position: relative;
+  }
+
+  .tray {
+    background:
+      linear-gradient(180deg, #6b4226 0%, #3d2410 100%);
+    border-radius: 16px;
+    padding: 12px 10px;
+    margin-bottom: 12px;
+    box-shadow:
+      inset 0 2px 6px rgba(0,0,0,0.5),
+      0 4px 10px rgba(0,0,0,0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .tray::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='100'><filter id='w'><feTurbulence type='turbulence' baseFrequency='0.015 0.4' numOctaves='2' seed='5'/><feColorMatrix values='0 0 0 0 0.18 0 0 0 0 0.1 0 0 0 0 0.04 0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23w)'/></svg>");
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  .tray-label {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--wood-light);
+    text-align: center;
+    margin-bottom: 8px;
+    opacity: 0.8;
+    z-index: 2;
+    position: relative;
+  }
+
+  .tray-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    z-index: 2;
+    position: relative;
+    align-items: end;
+  }
+
+  .tray-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .tray-slot-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--wood-light);
+    opacity: 0.7;
+  }
+
+  .tray-block {
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+  .tray-block:active { cursor: grabbing; }
+
+  /* TAMAÑOS BLOQUES */
+  .block-unit {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+  .block-unit svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.4)); }
+
+  /* DECENA AHORA: disco compacto (no barra alta) */
+  .block-ten {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+  .block-ten svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.45)); }
+
+  .block-hundred {
+    width: 50px;
+    height: 50px;
+    flex-shrink: 0;
+  }
+  .block-hundred svg { width: 100%; height: 100%; overflow: visible; filter: drop-shadow(1px 2px 3px rgba(0,0,0,0.5)); }
+
+  .block-tray-unit { width: 30px; height: 30px; }
+  .block-tray-ten { width: 48px; height: 48px; }
+  .block-tray-hundred { width: 56px; height: 56px; }
+
+  @keyframes blockIn {
+    from { transform: scale(0.5) translateY(-20px); opacity: 0; }
+    50% { transform: scale(1.1); opacity: 1; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+  .column-blocks > * {
+    animation: blockIn 0.35s cubic-bezier(0.3, 1.4, 0.5, 1);
+  }
+
+  @keyframes fuseGlow {
+    0% { transform: scale(1); filter: drop-shadow(0 0 0 var(--gold)); }
+    50% { transform: scale(1.2); filter: drop-shadow(0 0 12px var(--gold)) brightness(1.4); }
+    100% { transform: scale(0.3); filter: drop-shadow(0 0 0 var(--gold)); opacity: 0; }
+  }
+  .fusing { animation: fuseGlow 0.6s ease-in forwards; }
+
+  .col-clear {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(160, 40, 24, 0.85);
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .column.has-blocks .col-clear { opacity: 1; }
+
+  .feedback {
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 16px;
+    min-height: 24px;
+    color: var(--wood-2);
+    margin-bottom: 4px;
+  }
+  .feedback.success {
+    font-family: 'DM Sans', sans-serif;
+    font-style: normal;
+    color: var(--green);
+    font-weight: 700;
+    font-size: 18px;
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .btn {
+    border: 0;
+    padding: 12px 18px;
+    border-radius: 13px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.12s, box-shadow 0.12s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn:active { transform: translateY(1px); }
+
+  .btn-primary {
+    background: linear-gradient(180deg, #d94a2c, var(--accent) 70%, #6b1a0c);
+    color: #fff5e6;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+    box-shadow:
+      0 3px 0 #4a1308,
+      0 5px 12px rgba(0,0,0,0.5),
+      inset 0 1px 0 rgba(255,255,255,0.3);
+  }
+  .btn-primary:active {
+    box-shadow:
+      0 1px 0 #4a1308,
+      0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .btn-secondary {
+    background: linear-gradient(180deg, #c89968, var(--wood-1) 70%, #4a2810);
+    color: #fdf2dc;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+    box-shadow:
+      0 2px 0 #2a1808,
+      0 4px 8px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.25);
+  }
+
+  @keyframes float-up {
+    0% { transform: translateY(0) rotate(0); opacity: 1; }
+    100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+  }
+  .confetti {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    pointer-events: none;
+    z-index: 100;
+    animation: float-up 2.5s ease-out forwards;
+  }
+
+  .number-keypad {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .key {
+    background: linear-gradient(180deg, #fdf2dc, #d9c8a4);
+    border: 1px solid rgba(74, 40, 16, 0.3);
+    border-radius: 10px;
+    padding: 12px 0;
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow:
+      0 2px 0 var(--wood-1),
+      0 3px 6px rgba(0,0,0,0.3);
+  }
+  .key:active { transform: translateY(1px); box-shadow: 0 1px 0 var(--wood-1); }
+  .key.special { background: linear-gradient(180deg, #d94a2c, #a02818); color: white; }
+
+  .answer-display {
+    font-family: 'Fraunces', serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--ink);
+    text-align: center;
+    min-height: 60px;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+    border-bottom: 2px dashed rgba(74, 40, 16, 0.4);
+    padding-bottom: 6px;
+  }
+  .answer-display.empty {
+    color: rgba(74, 40, 16, 0.3);
+    font-style: italic;
+  }
+
+  footer {
+    margin-top: 12px;
+    font-size: 10px;
+    color: var(--wood-light);
+    opacity: 0.5;
+    z-index: 1;
+    letter-spacing: 0.05em;
+  }
+
+  .mode-content { display: none; }
+  .mode-content.active { display: block; }
+
+  @media (max-height: 720px) {
+    .target-number { font-size: 44px; }
+    .target-words { margin-bottom: 8px; font-size: 14px; }
+    .column { min-height: 150px; }
+  }
+.mode-content{display:none;}.mode-content.active{display:block;}</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Mate<span>Blocks</span></div>
+  <div class="module-name">Valor Posicional · 2/10</div>
+</header>
+
+<div style="display:flex;gap:6px;margin-bottom:12px;width:100%;max-width:480px;position:relative;z-index:1;">
+  <button id="btn-build" onclick="switchTab('build')" style="flex:1;border:0;padding:9px 4px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);border:1.5px solid rgba(255,255,255,.1);">🧱 Construir</button>
+  <button id="btn-read" onclick="switchTab('read')" style="flex:1;border:0;padding:9px 4px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);border:1.5px solid rgba(255,255,255,.1);">👁️ Leer</button>
+  <button id="btn-decompose" onclick="switchTab('decompose')" style="flex:1;border:0;padding:9px 4px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);border:1.5px solid rgba(255,255,255,.1);">🔍 Descomp.</button>
+  <button id="btn-info-posicional" onclick="switchTab('info-posicional')" style="flex:1;border:0;padding:9px 4px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);border:1.5px solid rgba(255,255,255,.1);">ℹ️ Info</button>
+</div>
+
+<div class="mode-content" id="mode-info-posicional">
+  <div class="card" style="color:#1a0a06;">
+    <h3 style="font-family:'Fraunces',serif;font-size:18px;font-weight:800;margin-bottom:10px;color:#4a2c14;">📦 Valor Posicional</h3>
+    <p style="font-size:13px;line-height:1.6;margin-bottom:8px;"><strong>Construir:</strong> Toca los bloques C/D/U para representar el número pedido.</p>
+    <p style="font-size:13px;line-height:1.6;margin-bottom:8px;"><strong>Leer:</strong> Cuenta los bloques y escribe el número que representan.</p>
+    <p style="font-size:13px;line-height:1.6;margin-bottom:8px;"><strong>Descomp.:</strong> Separa un número en centenas, decenas y unidades.</p>
+    <div style="background:rgba(200,153,104,.2);border-left:3px solid #c89968;padding:8px 10px;border-radius:0 8px 8px 0;font-size:12px;">💡 235 = 2 centenas + 3 decenas + 5 unidades = 200+30+5</div>
+  </div>
+</div>
+<div class="mode-content active" id="mode-build">
+  <div class="card">
+    <div class="target-label">Construye este número</div>
+    <div class="target-number" id="target-build">247</div>
+    <div class="target-words" id="target-build-words">doscientos cuarenta y siete</div>
+
+    <div class="columns" id="columns-build">
+      <div class="column hundreds" data-place="hundreds">
+        <div class="column-header">Centenas</div>
+        <div class="column-count" id="count-hundreds">0</div>
+        <div class="column-blocks" id="col-hundreds"></div>
+        <button class="col-clear" data-clear="hundreds">×</button>
+      </div>
+      <div class="column tens" data-place="tens">
+        <div class="column-header">Decenas</div>
+        <div class="column-count" id="count-tens">0</div>
+        <div class="column-blocks" id="col-tens"></div>
+        <button class="col-clear" data-clear="tens">×</button>
+      </div>
+      <div class="column units" data-place="units">
+        <div class="column-header">Unidades</div>
+        <div class="column-count" id="count-units">0</div>
+        <div class="column-blocks" id="col-units"></div>
+        <button class="col-clear" data-clear="units">×</button>
+      </div>
+    </div>
+
+    <div class="tray">
+      <div class="tray-label">Toca para añadir</div>
+      <div class="tray-grid">
+        <div class="tray-slot">
+          <div class="tray-block block-tray-hundred" data-add="hundreds" id="add-hundred"></div>
+          <div class="tray-slot-label">+ 100</div>
+        </div>
+        <div class="tray-slot">
+          <div class="tray-block block-tray-ten" data-add="tens" id="add-ten"></div>
+          <div class="tray-slot-label">+ 10</div>
+        </div>
+        <div class="tray-slot">
+          <div class="tray-block block-tray-unit" data-add="units" id="add-unit"></div>
+          <div class="tray-slot-label">+ 1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feedback" id="feedback-build">Toca los bloques para añadirlos</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="btn-new-build">🎲 Otro número</button>
+    <button class="btn btn-secondary" id="btn-clear-build">🧹 Limpiar</button>
+  </div>
+</div>
+
+<!-- MODO 2: LEER -->
+<div class="mode-content" id="mode-read">
+  <div class="card">
+    <div class="target-label">¿Qué número es este?</div>
+
+    <div class="columns" id="columns-read" style="margin-top: 8px;">
+      <div class="column hundreds">
+        <div class="column-header">Centenas</div>
+        <div class="column-count" id="read-count-hundreds">0</div>
+        <div class="column-blocks" id="read-col-hundreds"></div>
+      </div>
+      <div class="column tens">
+        <div class="column-header">Decenas</div>
+        <div class="column-count" id="read-count-tens">0</div>
+        <div class="column-blocks" id="read-col-tens"></div>
+      </div>
+      <div class="column units">
+        <div class="column-header">Unidades</div>
+        <div class="column-count" id="read-count-units">0</div>
+        <div class="column-blocks" id="read-col-units"></div>
+      </div>
+    </div>
+
+    <div class="answer-display empty" id="answer-display">_</div>
+
+    <div class="number-keypad">
+      <button class="key" data-key="1">1</button>
+      <button class="key" data-key="2">2</button>
+      <button class="key" data-key="3">3</button>
+      <button class="key" data-key="4">4</button>
+      <button class="key" data-key="5">5</button>
+      <button class="key" data-key="6">6</button>
+      <button class="key" data-key="7">7</button>
+      <button class="key" data-key="8">8</button>
+      <button class="key" data-key="9">9</button>
+      <button class="key" data-key="0">0</button>
+    </div>
+    <div class="number-keypad" style="grid-template-columns: 1fr 1fr;">
+      <button class="key special" id="key-back">⌫ Borrar</button>
+      <button class="key special" id="key-check">✓ Comprobar</button>
+    </div>
+
+    <div class="feedback" id="feedback-read">Mira los bloques y escribe el número</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="btn-new-read">🎲 Otro</button>
+  </div>
+</div>
+
+<!-- MODO 3: DESCOMPONER -->
+<div class="mode-content" id="mode-decompose">
+  <div class="card">
+    <div class="target-label">Descomponer en sumandos</div>
+    <div class="target-number" id="target-decompose">365</div>
+    <div class="target-words" id="target-decompose-words">trescientos sesenta y cinco</div>
+
+    <div style="text-align: center; margin: 16px 0; font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: var(--ink);">
+      <span id="decompose-h" style="color: var(--purple); border-bottom: 2px solid var(--purple); padding: 0 8px;">?</span>
+      <span style="color: var(--wood-2); margin: 0 4px;">+</span>
+      <span id="decompose-t" style="color: var(--blue); border-bottom: 2px solid var(--blue); padding: 0 8px;">?</span>
+      <span style="color: var(--wood-2); margin: 0 4px;">+</span>
+      <span id="decompose-u" style="color: var(--accent); border-bottom: 2px solid var(--accent); padding: 0 8px;">?</span>
+    </div>
+
+    <div class="columns" id="columns-decompose">
+      <div class="column hundreds" data-place="hundreds">
+        <div class="column-header">Centenas</div>
+        <div class="column-count" id="dec-count-hundreds">0</div>
+        <div class="column-blocks" id="dec-col-hundreds"></div>
+      </div>
+      <div class="column tens" data-place="tens">
+        <div class="column-header">Decenas</div>
+        <div class="column-count" id="dec-count-tens">0</div>
+        <div class="column-blocks" id="dec-col-tens"></div>
+      </div>
+      <div class="column units" data-place="units">
+        <div class="column-header">Unidades</div>
+        <div class="column-count" id="dec-count-units">0</div>
+        <div class="column-blocks" id="dec-col-units"></div>
+      </div>
+    </div>
+
+    <div class="tray">
+      <div class="tray-label">Toca para añadir</div>
+      <div class="tray-grid">
+        <div class="tray-slot">
+          <div class="tray-block block-tray-hundred" data-add-dec="hundreds"></div>
+          <div class="tray-slot-label">+ 100</div>
+        </div>
+        <div class="tray-slot">
+          <div class="tray-block block-tray-ten" data-add-dec="tens"></div>
+          <div class="tray-slot-label">+ 10</div>
+        </div>
+        <div class="tray-slot">
+          <div class="tray-block block-tray-unit" data-add-dec="units"></div>
+          <div class="tray-slot-label">+ 1</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feedback" id="feedback-decompose">Construye el número con bloques</div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="btn-new-decompose">🎲 Otro número</button>
+  </div>
+</div>
+
+<footer>Toca los bloques · Cuando junten 10, se transforman ✨</footer>
+
+<script>
+(function () {
+
+  // === BLOQUE UNIDAD (cubo de madera) ===
+  function unitSVG() {
+    const id = 'u' + Math.random().toString(36).slice(2,7);
+    return `<svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#f4c688"/>
+          <stop offset="50%" stop-color="#c2884a"/>
+          <stop offset="100%" stop-color="#7a4a1c"/>
+        </linearGradient>
+        <linearGradient id="${id}t" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="rgba(255,240,200,0.7)"/>
+          <stop offset="100%" stop-color="rgba(255,240,200,0)"/>
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="24" height="24" rx="3" fill="url(#${id})" stroke="#3a1f0a" stroke-width="0.8"/>
+      <rect x="3" y="3" width="22" height="6" rx="2" fill="url(#${id}t)"/>
+      <rect x="2" y="2" width="24" height="24" rx="3" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="0.5"/>
+    </svg>`;
+  }
+
+  // === DECENA: DISCO con 10 puntos en círculo ===
+  function tenSVG() {
+    const id = 't' + Math.random().toString(36).slice(2,7);
+    // 10 puntos distribuidos en círculo
+    const dots = [];
+    for (let i = 0; i < 10; i++) {
+      const angle = (i * 36 - 90) * Math.PI / 180;
+      const cx = 24 + 13 * Math.cos(angle);
+      const cy = 24 + 13 * Math.sin(angle);
+      dots.push(`<circle cx="${cx}" cy="${cy}" r="2.6" fill="#f4f8e8" opacity="0.95"/>
+                 <circle cx="${cx-0.6}" cy="${cy-0.6}" r="1" fill="rgba(255,255,255,0.6)"/>`);
+    }
+    return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <radialGradient id="${id}" cx="35%" cy="30%" r="70%">
+          <stop offset="0%" stop-color="#a3c89e"/>
+          <stop offset="50%" stop-color="#5a8458"/>
+          <stop offset="100%" stop-color="#2c4528"/>
+        </radialGradient>
+        <radialGradient id="${id}c" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(0,0,0,0.4)"/>
+          <stop offset="60%" stop-color="rgba(0,0,0,0.1)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+        </radialGradient>
+      </defs>
+      <!-- Disco principal -->
+      <circle cx="24" cy="24" r="22" fill="url(#${id})" stroke="#1c2818" stroke-width="0.8"/>
+      <!-- Anillo interior (relieve) -->
+      <circle cx="24" cy="24" r="19" fill="none" stroke="rgba(0,0,0,0.25)" stroke-width="0.6"/>
+      <!-- Highlight superior -->
+      <ellipse cx="20" cy="14" rx="11" ry="4" fill="rgba(255,255,240,0.25)"/>
+      <!-- 10 puntos en círculo -->
+      ${dots.join('')}
+      <!-- Sombra interior central -->
+      <circle cx="24" cy="24" r="6" fill="url(#${id}c)"/>
+      <!-- Borde exterior con sombra -->
+      <circle cx="24" cy="24" r="22" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/>
+    </svg>`;
+  }
+
+  // === CENTENA: placa con cuadrícula 10x10 ===
+  function hundredSVG() {
+    const id = 'h' + Math.random().toString(36).slice(2,7);
+    return `<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#7ba5d4"/>
+          <stop offset="50%" stop-color="#2c5282"/>
+          <stop offset="100%" stop-color="#1a3458"/>
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="56" height="56" rx="4" fill="url(#${id})" stroke="#0f2040" stroke-width="0.8"/>
+      <rect x="3" y="3" width="54" height="14" rx="2" fill="rgba(255,255,255,0.2)"/>
+      ${[...Array(11)].map((_, i) => {
+        const p = 5 + i * 5;
+        return `<line x1="${p}" y1="3" x2="${p}" y2="57" stroke="rgba(0,0,0,0.28)" stroke-width="0.4"/>
+                <line x1="3" y1="${p}" x2="57" y2="${p}" stroke="rgba(0,0,0,0.28)" stroke-width="0.4"/>`;
+      }).join('')}
+      <rect x="2" y="2" width="56" height="56" rx="4" fill="none" stroke="rgba(0,0,0,0.3)" stroke-width="0.5"/>
+    </svg>`;
+  }
+
+  // Inicializar SVG en bandejas
+  document.getElementById('add-unit').innerHTML = unitSVG();
+  document.getElementById('add-ten').innerHTML = tenSVG();
+  document.getElementById('add-hundred').innerHTML = hundredSVG();
+  document.querySelectorAll('[data-add-dec]').forEach(el => {
+    const place = el.dataset.addDec;
+    el.innerHTML = place === 'units' ? unitSVG() : place === 'tens' ? tenSVG() : hundredSVG();
+  });
+
+  // === ESTADO ===
+  let mode = 'build';
+  let buildState = { hundreds: 0, tens: 0, units: 0, target: 0 };
+  let readState = { hundreds: 0, tens: 0, units: 0, target: 0, answer: '' };
+  let decomposeState = { hundreds: 0, tens: 0, units: 0, target: 0 };
+
+  function numberToWords(n) {
+    const UNITS = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+    const TEENS = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
+    const TENS = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+    const HUNDREDS = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+
+    if (n === 0) return 'cero';
+    if (n === 100) return 'cien';
+
+    const h = Math.floor(n / 100);
+    const u = n % 10;
+
+    let parts = [];
+    if (h > 0) parts.push(HUNDREDS[h]);
+
+    const tu = n % 100;
+    if (tu < 10) {
+      if (u > 0) parts.push(UNITS[u]);
+    } else if (tu < 20) {
+      parts.push(TEENS[tu - 10]);
+    } else if (tu < 30) {
+      const teens20 = ['veinte','veintiuno','veintidós','veintitrés','veinticuatro','veinticinco','veintiséis','veintisiete','veintiocho','veintinueve'];
+      parts.push(teens20[tu - 20]);
+    } else {
+      const t = Math.floor(tu / 10);
+      if (u === 0) parts.push(TENS[t]);
+      else parts.push(TENS[t] + ' y ' + UNITS[u]);
+    }
+
+    return parts.join(' ');
+  }
+
+  function celebrate(big = false) {
+    const colors = ['#a02818', '#4a7048', '#b8893f', '#5c3a1a', '#d94a2c', '#f4d896', '#2c5282'];
+    const n = big ? 50 : 25;
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.bottom = '0';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+      c.style.animationDelay = Math.random() * 0.4 + 's';
+      c.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4000);
+    }
+  }
+
+  // === MODO 1: CONSTRUIR ===
+  function buildRender() {
+    const cols = ['hundreds', 'tens', 'units'];
+    cols.forEach(place => {
+      const count = buildState[place];
+      document.getElementById('count-' + place).textContent = count;
+      const colEl = document.querySelector(`#columns-build .column.${place}`);
+      colEl.classList.toggle('has-blocks', count > 0);
+      const container = document.getElementById('col-' + place);
+      const current = container.children.length;
+      if (current < count) {
+        for (let i = current; i < count; i++) {
+          const div = document.createElement('div');
+          div.className = place === 'units' ? 'block-unit' : place === 'tens' ? 'block-ten' : 'block-hundred';
+          div.innerHTML = place === 'units' ? unitSVG() : place === 'tens' ? tenSVG() : hundredSVG();
+          container.appendChild(div);
+        }
+      } else if (current > count) {
+        for (let i = current - 1; i >= count; i--) {
+          container.children[i].remove();
+        }
+      }
+    });
+
+    const built = buildState.hundreds * 100 + buildState.tens * 10 + buildState.units;
+    const fb = document.getElementById('feedback-build');
+    if (built === buildState.target && buildState.target > 0) {
+      fb.textContent = '¡Perfecto! ' + numberToWords(built);
+      fb.className = 'feedback success';
+      celebrate();
+      setTimeout(() => buildNew(), 2000);
+    } else if (built > buildState.target) {
+      fb.textContent = 'Te has pasado · llevas ' + built;
+      fb.className = 'feedback';
+    } else if (built > 0) {
+      fb.textContent = 'Llevas ' + built + ' · faltan ' + (buildState.target - built);
+      fb.className = 'feedback';
+    } else {
+      fb.textContent = 'Toca los bloques para añadirlos';
+      fb.className = 'feedback';
+    }
+  }
+
+  function buildAdd(place) {
+    buildState[place]++;
+    if (place === 'units' && buildState.units === 10) {
+      fuseAnimation('col-units', () => {
+        buildState.units = 0;
+        buildState.tens++;
+        buildRender();
+      });
+      return;
+    }
+    if (place === 'tens' && buildState.tens === 10) {
+      fuseAnimation('col-tens', () => {
+        buildState.tens = 0;
+        buildState.hundreds++;
+        buildRender();
+      });
+      return;
+    }
+    if (place === 'hundreds' && buildState.hundreds === 10) {
+      buildState.hundreds = 9;
+      const fb = document.getElementById('feedback-build');
+      fb.textContent = 'Máximo 999 en este nivel';
+      fb.className = 'feedback';
+      return;
+    }
+    buildRender();
+  }
+
+  function fuseAnimation(containerId, callback) {
+    const container = document.getElementById(containerId);
+    Array.from(container.children).forEach(el => el.classList.add('fusing'));
+    setTimeout(callback, 600);
+  }
+
+  function buildClear() {
+    buildState.hundreds = 0;
+    buildState.tens = 0;
+    buildState.units = 0;
+    buildRender();
+  }
+
+  function buildClearColumn(place) {
+    buildState[place] = 0;
+    buildRender();
+  }
+
+  function buildNew() {
+    const target = Math.floor(Math.random() * 899) + 100;
+    buildState = { hundreds: 0, tens: 0, units: 0, target };
+    document.getElementById('target-build').textContent = target;
+    document.getElementById('target-build-words').textContent = numberToWords(target);
+    buildRender();
+  }
+
+  document.querySelectorAll('[data-add]').forEach(el => {
+    el.addEventListener('click', () => buildAdd(el.dataset.add));
+  });
+  document.querySelectorAll('[data-clear]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      buildClearColumn(el.dataset.clear);
+    });
+  });
+  document.getElementById('btn-clear-build').addEventListener('click', buildClear);
+  document.getElementById('btn-new-build').addEventListener('click', buildNew);
+
+  // === MODO 2: LEER ===
+  function readNew() {
+    const target = Math.floor(Math.random() * 899) + 100;
+    const h = Math.floor(target / 100);
+    const t = Math.floor((target % 100) / 10);
+    const u = target % 10;
+    readState = { hundreds: h, tens: t, units: u, target, answer: '' };
+
+    document.getElementById('read-count-hundreds').textContent = h;
+    document.getElementById('read-count-tens').textContent = t;
+    document.getElementById('read-count-units').textContent = u;
+
+    ['hundreds', 'tens', 'units'].forEach(place => {
+      const container = document.getElementById('read-col-' + place);
+      container.innerHTML = '';
+      const count = readState[place];
+      for (let i = 0; i < count; i++) {
+        const div = document.createElement('div');
+        div.className = place === 'units' ? 'block-unit' : place === 'tens' ? 'block-ten' : 'block-hundred';
+        div.innerHTML = place === 'units' ? unitSVG() : place === 'tens' ? tenSVG() : hundredSVG();
+        container.appendChild(div);
+      }
+    });
+
+    readState.answer = '';
+    updateAnswerDisplay();
+    document.getElementById('feedback-read').textContent = 'Mira los bloques y escribe el número';
+    document.getElementById('feedback-read').className = 'feedback';
+  }
+
+  function updateAnswerDisplay() {
+    const display = document.getElementById('answer-display');
+    if (readState.answer === '') {
+      display.textContent = '_ _ _';
+      display.className = 'answer-display empty';
+    } else {
+      display.textContent = readState.answer;
+      display.className = 'answer-display';
+    }
+  }
+
+  function readKey(digit) {
+    if (readState.answer.length < 4) {
+      readState.answer += digit;
+      updateAnswerDisplay();
+    }
+  }
+
+  function readBack() {
+    readState.answer = readState.answer.slice(0, -1);
+    updateAnswerDisplay();
+  }
+
+  function readCheck() {
+    const fb = document.getElementById('feedback-read');
+    if (readState.answer === '') {
+      fb.textContent = 'Escribe primero el número';
+      fb.className = 'feedback';
+      return;
+    }
+    const num = parseInt(readState.answer, 10);
+    if (num === readState.target) {
+      fb.textContent = '¡Perfecto! ' + numberToWords(num);
+      fb.className = 'feedback success';
+      celebrate();
+      setTimeout(readNew, 2200);
+    } else if (num > readState.target) {
+      fb.textContent = 'Demasiado grande, mira otra vez los bloques';
+      fb.className = 'feedback';
+    } else {
+      fb.textContent = 'Casi, prueba de nuevo';
+      fb.className = 'feedback';
+    }
+  }
+
+  document.querySelectorAll('[data-key]').forEach(k => {
+    k.addEventListener('click', () => readKey(k.dataset.key));
+  });
+  document.getElementById('key-back').addEventListener('click', readBack);
+  document.getElementById('key-check').addEventListener('click', readCheck);
+  document.getElementById('btn-new-read').addEventListener('click', readNew);
+
+  // === MODO 3: DESCOMPONER ===
+  function decomposeRender() {
+    const cols = ['hundreds', 'tens', 'units'];
+    cols.forEach(place => {
+      const count = decomposeState[place];
+      document.getElementById('dec-count-' + place).textContent = count;
+      const container = document.getElementById('dec-col-' + place);
+      const current = container.children.length;
+      if (current < count) {
+        for (let i = current; i < count; i++) {
+          const div = document.createElement('div');
+          div.className = place === 'units' ? 'block-unit' : place === 'tens' ? 'block-ten' : 'block-hundred';
+          div.innerHTML = place === 'units' ? unitSVG() : place === 'tens' ? tenSVG() : hundredSVG();
+          container.appendChild(div);
+        }
+      } else if (current > count) {
+        for (let i = current - 1; i >= count; i--) {
+          container.children[i].remove();
+        }
+      }
+    });
+
+    const h = decomposeState.hundreds * 100;
+    const t = decomposeState.tens * 10;
+    const u = decomposeState.units;
+    document.getElementById('decompose-h').textContent = h > 0 ? h : '?';
+    document.getElementById('decompose-t').textContent = t > 0 ? t : '?';
+    document.getElementById('decompose-u').textContent = u > 0 ? u : '?';
+
+    const built = h + t + u;
+    const fb = document.getElementById('feedback-decompose');
+    if (built === decomposeState.target && decomposeState.target > 0) {
+      fb.textContent = `¡Perfecto! ${decomposeState.target} = ${h} + ${t} + ${u}`;
+      fb.className = 'feedback success';
+      celebrate(true);
+      setTimeout(decomposeNew, 2500);
+    } else if (built > decomposeState.target) {
+      fb.textContent = 'Te has pasado · llevas ' + built;
+      fb.className = 'feedback';
+    } else if (built > 0) {
+      fb.textContent = 'Llevas ' + built + ' · faltan ' + (decomposeState.target - built);
+      fb.className = 'feedback';
+    } else {
+      fb.textContent = 'Construye el número con bloques';
+      fb.className = 'feedback';
+    }
+  }
+
+  function decomposeAdd(place) {
+    decomposeState[place]++;
+    if (place === 'units' && decomposeState.units === 10) {
+      fuseAnimation('dec-col-units', () => {
+        decomposeState.units = 0;
+        decomposeState.tens++;
+        decomposeRender();
+      });
+      return;
+    }
+    if (place === 'tens' && decomposeState.tens === 10) {
+      fuseAnimation('dec-col-tens', () => {
+        decomposeState.tens = 0;
+        decomposeState.hundreds++;
+        decomposeRender();
+      });
+      return;
+    }
+    if (place === 'hundreds' && decomposeState.hundreds === 10) {
+      decomposeState.hundreds = 9;
+      return;
+    }
+    decomposeRender();
+  }
+
+  function decomposeNew() {
+    let target;
+    const r = Math.random();
+    if (r < 0.15) {
+      target = (Math.floor(Math.random() * 9) + 1) * 100 + Math.floor(Math.random() * 9) + 1;
+    } else if (r < 0.30) {
+      target = (Math.floor(Math.random() * 9) + 1) * 100 + (Math.floor(Math.random() * 9) + 1) * 10;
+    } else {
+      target = Math.floor(Math.random() * 899) + 100;
+    }
+    decomposeState = { hundreds: 0, tens: 0, units: 0, target };
+    document.getElementById('target-decompose').textContent = target;
+    document.getElementById('target-decompose-words').textContent = numberToWords(target);
+    decomposeRender();
+  }
+
+  document.querySelectorAll('[data-add-dec]').forEach(el => {
+    el.addEventListener('click', () => decomposeAdd(el.dataset.addDec));
+  });
+  document.getElementById('btn-new-decompose').addEventListener('click', decomposeNew);
+
+  // === SELECTOR DE MODO ===
+  function setMode(m) { if(window.switchTab) switchTab(m); }
+
+  document.getElementById('btn-build').addEventListener('click', () => setMode('build'));
+  document.getElementById('btn-read').addEventListener('click', () => setMode('read'));
+  document.getElementById('btn-decompose').addEventListener('click', () => setMode('decompose'));
+  
+
+  buildNew();
+  readNew();
+  decomposeNew();
+})();
+
+  function switchTab(m) {
+    ['build','read','decompose','info-posicional'].forEach(function(x) {
+      var b = document.getElementById('btn-' + x);
+      var p = document.getElementById('mode-' + x);
+      if(b) { b.style.background='rgba(255,255,255,.1)'; b.style.color='rgba(237,224,196,.6)'; b.style.borderColor='rgba(255,255,255,.1)'; }
+      if(p) p.classList.remove('active');
+    });
+    var ab = document.getElementById('btn-' + m);
+    var ap = document.getElementById('mode-' + m);
+    if(ab) { ab.style.background='linear-gradient(180deg,#c89968,#8b5a2b)'; ab.style.color='#1a0a06'; ab.style.borderColor='#c89968'; }
+    if(ap) ap.classList.add('active');
+  }
+  switchTab('build');
+</script>
+
+</body>
+</html>

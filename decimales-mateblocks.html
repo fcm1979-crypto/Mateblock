@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+<title>MateBlocks — Decimales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:#ede0c4;--paper-2:#d9c8a4;--ink:#1a120a;
+    --wood-1:#8b5a2b;--wood-2:#5c3a1a;--wood-3:#3d2410;
+    --wood-light:#c89968;--gold:#b8893f;
+    --accent:#a02818;--accent-2:#d94a2c;--green:#4a7048;--blue:#2c5282;--purple:#6b3aed;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{overscroll-behavior:none;touch-action:manipulation;min-height:100%;}
+  body{
+    font-family:'DM Sans',sans-serif;
+    background:radial-gradient(ellipse at 30% 0%,#6b4226,transparent 60%),
+      radial-gradient(ellipse at 70% 100%,#2a1810,transparent 50%),
+      linear-gradient(135deg,#4a2c14,#2a1808 60%,#150a04);
+    color:var(--paper);min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:12px 12px 24px;overflow-x:hidden;
+  }
+  body::before{content:"";position:fixed;inset:0;
+    background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,0.5) 100%);
+    pointer-events:none;z-index:0;}
+
+  header{width:100%;max-width:480px;display:flex;justify-content:space-between;align-items:baseline;padding:4px 4px 12px;z-index:1;}
+  .logo{font-family:'Fraunces',serif;font-weight:800;font-size:20px;color:var(--paper);text-shadow:0 2px 8px rgba(0,0,0,0.5);}
+  .logo span{color:var(--accent-2);}
+  .module-name{font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:var(--wood-light);font-weight:500;opacity:0.85;}
+
+  
+  
+  
+  
+
+  .card{width:100%;max-width:480px;
+    background:linear-gradient(180deg,rgba(237,224,196,0.97),rgba(217,200,164,0.97));
+    border:1px solid rgba(74,40,16,0.3);border-radius:22px;
+    padding:18px 16px 16px;
+    box-shadow:0 12px 28px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.6);z-index:1;}
+
+  .section-label{font-size:10px;text-transform:uppercase;letter-spacing:0.2em;
+    color:var(--wood-2);text-align:center;margin-bottom:10px;opacity:0.7;}
+
+  /* ══ MODO 1: VISUAL — recta numérica con zoom ══ */
+  .number-line-wrap{margin-bottom:16px;}
+
+  .nl-label{font-size:11px;text-transform:uppercase;letter-spacing:0.15em;
+    color:var(--wood-2);text-align:center;margin-bottom:6px;opacity:0.7;}
+
+  .nl-svg-wrap{width:100%;overflow:hidden;border-radius:12px;
+    background:rgba(255,255,255,0.35);padding:8px 0;
+    box-shadow:inset 0 1px 4px rgba(60,30,10,0.15);}
+
+  /* Número grande destacado */
+  .vis-number{font-family:'Fraunces',serif;font-size:72px;font-weight:800;
+    color:var(--ink);text-align:center;margin:8px 0;
+    text-shadow:2px 2px 0 rgba(255,255,255,0.5);letter-spacing:-0.02em;}
+  .vis-number .dec{color:var(--accent);}
+
+  /* Control deslizante */
+  .slider-wrap{margin-bottom:12px;}
+  .slider-label{display:flex;justify-content:space-between;
+    font-size:11px;color:var(--wood-2);margin-bottom:4px;opacity:0.7;}
+  input[type=range]{width:100%;-webkit-appearance:none;height:8px;
+    border-radius:99px;background:rgba(74,40,16,0.2);outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px;
+    border-radius:50%;background:linear-gradient(180deg,#e8c989,var(--gold));
+    box-shadow:0 2px 6px rgba(0,0,0,0.4);cursor:pointer;}
+
+  /* Cuadrícula 10×10 para décimas/centésimas */
+  .grid-wrap{display:flex;gap:8px;justify-content:center;margin-bottom:10px;flex-wrap:wrap;}
+  .grid-box{display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .grid-label{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;
+    color:var(--wood-2);opacity:0.7;}
+  .dec-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;}
+  .dec-cell{width:20px;height:20px;border-radius:3px;border:1px solid rgba(74,40,16,0.2);}
+  .dec-cell.lit-int{background:linear-gradient(135deg,#2c5282,#1a3458);}
+  .dec-cell.lit-dec{background:linear-gradient(135deg,#d94a2c,#a02818);}
+  .dec-cell.lit-cen{background:linear-gradient(135deg,#d4a830,#8a6020);}
+  .dec-cell.unlit{background:rgba(74,40,16,0.08);}
+
+  .vis-explain{font-family:'Cormorant Garamond',serif;font-style:italic;
+    font-size:15px;color:var(--wood-2);text-align:center;margin-top:6px;}
+
+  /* ══ MODO 2: COMPARAR ══ */
+  .compare-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;
+    align-items:center;margin-bottom:14px;}
+  .dec-card{background:rgba(255,255,255,0.45);border-radius:14px;
+    padding:14px 8px;text-align:center;
+    box-shadow:inset 0 1px 3px rgba(60,30,10,0.12);}
+  .dec-card .big{font-family:'Fraunces',serif;font-size:36px;font-weight:800;color:var(--ink);}
+  .dec-card .big .d{color:var(--accent);}
+  .dec-bar{height:12px;border-radius:99px;margin-top:8px;
+    background:rgba(74,40,16,0.12);overflow:hidden;}
+  .dec-bar-fill{height:100%;border-radius:99px;transition:width 0.5s;}
+
+  .sym-area{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .sym-result{font-family:'Fraunces',serif;font-size:36px;font-weight:800;
+    color:var(--wood-2);min-height:44px;display:flex;align-items:center;justify-content:center;}
+  .sym-btn{width:50px;height:50px;border-radius:50%;border:0;
+    font-family:'Fraunces',serif;font-size:26px;font-weight:800;
+    background:linear-gradient(180deg,#fdf2dc,#d9c8a4);color:var(--ink);cursor:pointer;
+    box-shadow:0 2px 0 var(--wood-1),0 3px 6px rgba(0,0,0,0.25);
+    display:flex;align-items:center;justify-content:center;}
+  .sym-btn:active{transform:scale(0.93);}
+  .sym-btn.correct{background:linear-gradient(180deg,#d4edcf,#b8ddb2);border:2px solid var(--green);}
+  .sym-btn.wrong{background:linear-gradient(180deg,#f5d0cc,#e8b0aa);border:2px solid var(--accent);}
+
+  .score-bar{display:flex;justify-content:center;gap:16px;margin-bottom:10px;}
+  .score-item{text-align:center;}
+  .score-num{font-family:'Fraunces',serif;font-size:26px;font-weight:700;color:var(--ink);}
+  .score-label{font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:var(--wood-2);opacity:0.7;}
+
+  /* ══ MODO 3: OPERACIONES ══ */
+  .op-card{background:rgba(255,255,255,0.4);border-radius:14px;
+    padding:12px;margin-bottom:12px;
+    box-shadow:inset 0 1px 4px rgba(60,30,10,0.15);}
+  .op-row{display:flex;justify-content:flex-end;align-items:center;gap:0;}
+  .op-sign{font-family:'Fraunces',serif;font-size:36px;font-weight:700;
+    color:var(--ink);margin-right:6px;opacity:0.4;min-width:20px;text-align:right;}
+  .op-num{font-family:'Fraunces',serif;font-size:40px;font-weight:700;color:var(--ink);
+    min-width:120px;text-align:right;letter-spacing:-0.01em;}
+  .op-num .d{color:var(--accent);}
+  .op-line{width:100%;height:2px;
+    background:linear-gradient(90deg,transparent,var(--wood-2) 20%,var(--wood-2) 80%,transparent);
+    margin:6px 0;}
+
+  /* Selector suma/resta */
+  .op-type-row{display:flex;gap:8px;justify-content:center;margin-bottom:12px;}
+  .op-type-btn{padding:8px 20px;border-radius:10px;border:2px solid rgba(74,40,16,0.2);
+    font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+    cursor:pointer;background:linear-gradient(180deg,#fdf2dc,#d9c8a4);color:var(--ink);}
+  .op-type-btn.active{border-color:var(--accent);background:linear-gradient(180deg,#f5d0cc,#e8b0aa);}
+
+  /* Teclado */
+  .answer-display{font-family:'Fraunces',serif;font-size:44px;font-weight:700;
+    color:var(--ink);text-align:center;min-height:56px;
+    margin-bottom:8px;border-bottom:2px dashed rgba(74,40,16,0.35);padding-bottom:4px;}
+  .answer-display.empty{color:rgba(74,40,16,0.25);}
+
+  .keypad{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:6px;}
+  .key{background:linear-gradient(180deg,#fdf2dc,#d9c8a4);
+    border:1px solid rgba(74,40,16,0.25);border-radius:9px;
+    padding:11px 0;font-family:'Fraunces',serif;font-weight:700;
+    font-size:18px;color:var(--ink);cursor:pointer;
+    box-shadow:0 2px 0 var(--wood-1);}
+  .key:active{transform:translateY(1px);}
+  .key.special{background:linear-gradient(180deg,#d94a2c,#a02818);color:white;box-shadow:0 2px 0 #4a1308;}
+  .key.dot{font-size:22px;font-weight:900;}
+
+  /* Feedback */
+  .feedback{text-align:center;font-family:'Cormorant Garamond',serif;font-style:italic;
+    font-size:16px;min-height:24px;color:var(--wood-2);margin-top:6px;}
+  .feedback.success{font-family:'DM Sans',sans-serif;font-style:normal;color:var(--green);font-weight:700;font-size:17px;}
+  .feedback.wrong{font-family:'DM Sans',sans-serif;font-style:normal;color:var(--accent);font-weight:700;font-size:15px;}
+
+  .controls{display:flex;gap:8px;margin-top:12px;justify-content:center;z-index:1;}
+  .btn{border:0;padding:12px 18px;border-radius:13px;
+    font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+    cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:linear-gradient(180deg,#d94a2c,var(--accent) 70%,#6b1a0c);color:#fff5e6;
+    box-shadow:0 3px 0 #4a1308,0 5px 12px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.3);}
+  .btn-secondary{background:linear-gradient(180deg,#c89968,var(--wood-1) 70%,#4a2810);color:#fdf2dc;
+    box-shadow:0 2px 0 #2a1808,0 4px 8px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.25);}
+
+  /* Banner final app completa */
+  .complete-banner{
+    background:linear-gradient(135deg,#4a7048,#2c4028);
+    border-radius:18px;padding:16px;margin-top:14px;
+    text-align:center;
+    box-shadow:0 6px 20px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.15);
+    z-index:1;width:100%;max-width:480px;
+  }
+  .complete-banner .trophy{font-size:48px;margin-bottom:6px;}
+  .complete-banner h2{font-family:'Fraunces',serif;font-size:22px;font-weight:800;
+    color:var(--paper);margin-bottom:4px;}
+  .complete-banner p{font-family:'Cormorant Garamond',serif;font-style:italic;
+    font-size:15px;color:var(--wood-light);opacity:0.9;}
+
+  @keyframes popIn{from{transform:scale(0.5);opacity:0;}70%{transform:scale(1.1);opacity:1;}to{transform:scale(1);opacity:1;}}
+  .pop-anim{animation:popIn 0.35s cubic-bezier(0.3,1.4,0.5,1);}
+  @keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}
+    40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+  .shake{animation:shake 0.4s ease;}
+  @keyframes float-up{0%{transform:translateY(0) rotate(0);opacity:1;}100%{transform:translateY(-100vh) rotate(720deg);opacity:0;}}
+  .confetti{position:fixed;width:12px;height:12px;pointer-events:none;z-index:100;animation:float-up 2.5s ease-out forwards;}
+
+  .mode-content{display:none;}
+  .mode-content.active{display:block;}
+  footer{margin-top:16px;font-size:10px;color:var(--wood-light);opacity:0.5;z-index:1;letter-spacing:0.05em;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Mate<span>Blocks</span></div>
+  <div class="module-name">Decimales · 10/10</div>
+</header>
+
+<div style="display:flex;gap:6px;margin-bottom:12px;width:100%;max-width:480px;position:relative;z-index:1;">
+  <button id="btn-visual" onclick="switchTab('visual')" style="flex:1;border:0;padding:9px 4px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);border:1.5px solid rgba(255,255,255,.1);">🔢 Ver</button>
+  <button id="btn-compare" onclick="switchTab('compare')" style="flex:1;border:0;padding:9px 4px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);border:1.5px solid rgba(255,255,255,.1);">⚖️ Comparar</button>
+  <button id="btn-ops" onclick="switchTab('ops')" style="flex:1;border:0;padding:9px 4px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);border:1.5px solid rgba(255,255,255,.1);">➕ Operar</button>
+  <button id="btn-info-decimales" onclick="switchTab('info-decimales')" style="flex:1;border:0;padding:9px 4px;border-radius:11px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);border:1.5px solid rgba(255,255,255,.1);">ℹ️ Info</button>
+</div>
+
+<!-- ══ MODO 1: VISUAL ══ -->
+<div class="mode-content" id="mode-info-decimales">
+  <div class="card" style="color:#1a0a06;">
+    <h3 style="font-family:'Fraunces',serif;font-size:18px;font-weight:800;margin-bottom:10px;color:#4a2c14;">🔢 Decimales</h3>
+    <p style="font-size:13px;line-height:1.6;margin-bottom:8px;"><strong>¡Clave!</strong> 1,1 = 1,10 (iguales) pero 1,1 ≠ 1,01 (muy diferentes).</p>
+    <p style="font-size:13px;line-height:1.6;margin-bottom:8px;">La <strong>1ª cifra</strong> tras la coma son décimas (×0,1). La <strong>2ª</strong> son centésimas (×0,01).</p>
+    <div style="background:rgba(200,153,104,.2);border-left:3px solid #c89968;padding:8px 10px;border-radius:0 8px 8px 0;font-size:12px;">💡 1,1 = 1 entero + 1 décima &nbsp;·&nbsp; 1,01 = 1 entero + 1 centésima</div>
+  </div>
+</div>
+<div class="mode-content active" id="mode-visual">
+  <div class="card">
+    <div class="section-label">Mueve el deslizador y observa</div>
+
+    <div class="vis-number" id="vis-num">
+      <span id="vis-int">1</span><span class="dec">,<span id="vis-dec">35</span></span>
+    </div>
+
+    <div class="slider-wrap">
+      <div class="slider-label"><span>0,00</span><span>2,99</span></div>
+      <input type="range" id="vis-slider" min="0" max="299" value="135" step="1"/>
+    </div>
+
+    <!-- Cuadrícula 10×10 para visualizar las partes -->
+    <div class="grid-wrap" id="vis-grid"></div>
+
+    <!-- Recta numérica SVG con zoom -->
+    <div class="nl-label">Recta numérica</div>
+    <div class="nl-svg-wrap">
+      <svg id="nl-svg" width="100%" height="52" viewBox="0 0 320 52" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="vis-explain" id="vis-explain">
+      1 entero · 3 décimas · 5 centésimas
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODO 2: COMPARAR ══ -->
+<div class="mode-content" id="mode-compare">
+  <div class="card">
+    <div class="score-bar">
+      <div class="score-item"><div class="score-num" id="cmp-ok">0</div><div class="score-label">Aciertos</div></div>
+      <div class="score-item"><div class="score-num" id="cmp-tot">0</div><div class="score-label">Total</div></div>
+    </div>
+
+    <div class="section-label">¿Cuál es mayor?</div>
+
+    <div class="compare-row">
+      <div class="dec-card">
+        <div class="big" id="cmp-a">1<span class="d">,35</span></div>
+        <div class="dec-bar"><div class="dec-bar-fill" id="cmp-bar-a" style="width:0%;background:#d94a2c;"></div></div>
+      </div>
+      <div class="sym-area">
+        <div class="sym-result" id="cmp-sym">?</div>
+        <button class="sym-btn" id="sym-lt">&lt;</button>
+        <button class="sym-btn" id="sym-eq">=</button>
+        <button class="sym-btn" id="sym-gt">&gt;</button>
+      </div>
+      <div class="dec-card">
+        <div class="big" id="cmp-b">1<span class="d">,53</span></div>
+        <div class="dec-bar"><div class="dec-bar-fill" id="cmp-bar-b" style="width:0%;background:#2c5282;"></div></div>
+      </div>
+    </div>
+
+    <div class="feedback" id="cmp-feedback">Mira las barras y elige &lt; = &gt;</div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" id="btn-new-cmp">🎲 Otro par</button>
+  </div>
+</div>
+
+<!-- ══ MODO 3: OPERAR ══ -->
+<div class="mode-content" id="mode-ops">
+  <div class="card">
+    <div class="op-type-row">
+      <button class="op-type-btn active" id="op-sum">＋ Suma</button>
+      <button class="op-type-btn" id="op-sub">－ Resta</button>
+    </div>
+
+    <div class="op-card">
+      <div class="op-row">
+        <div class="op-sign" style="opacity:0">+</div>
+        <div class="op-num" id="op-a">2<span class="d">,4</span></div>
+      </div>
+      <div class="op-row">
+        <div class="op-sign" id="op-sign">+</div>
+        <div class="op-num" id="op-b">1<span class="d">,3</span></div>
+      </div>
+      <div class="op-line"></div>
+      <div class="op-row">
+        <div class="op-sign" style="opacity:0">+</div>
+        <div class="op-num" style="color:var(--green);" id="op-result-display">?</div>
+      </div>
+    </div>
+
+    <div class="answer-display empty" id="ops-answer">_ , _ _</div>
+
+    <div class="keypad" id="ops-keypad"></div>
+    <div class="keypad" style="grid-template-columns:1fr 1fr;">
+      <button class="key special" id="ops-back">⌫ Borrar</button>
+      <button class="key special" id="ops-check">✓ Comprobar</button>
+    </div>
+
+    <div class="feedback" id="ops-feedback">Calcula el resultado con decimales</div>
+  </div>
+  <div class="controls">
+    <button class="btn btn-primary" id="btn-new-ops">🎲 Otra operación</button>
+  </div>
+</div>
+
+<!-- Banner app completa -->
+<div class="complete-banner" id="complete-banner" style="display:none;">
+  <div class="trophy">🏆</div>
+  <h2>¡MateBlocks completo!</h2>
+  <p>Has construido los 8 módulos de matemáticas de primaria.<br>Reloj · Valor Posicional · Llevadas · Romanos · Tablas · Fracciones · Monedas · Decimales</p>
+</div>
+
+<footer>Las décimas y centésimas son partes del entero 🔢</footer>
+
+<script>
+(function () {
+
+  function rand(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+
+  function fmtDec(n) {
+    // n es entero en centésimas, devuelve string "X,XX"
+    var e = Math.floor(n / 100);
+    var c = n % 100;
+    return e + ',' + (c < 10 ? '0' + c : String(c));
+  }
+
+  function celebrate(big) {
+    var colors = ['#a02818','#4a7048','#b8893f','#5c3a1a','#d94a2c','#f4d896','#2c5282','#6b3aed'];
+    var n = big ? 60 : 32;
+    for (var i = 0; i < n; i++) {
+      (function () {
+        var c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.bottom = '0';
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        c.style.animationDelay = Math.random() * 0.4 + 's';
+        c.style.animationDuration = (2 + Math.random() * 1.5) + 's';
+        document.body.appendChild(c);
+        setTimeout(function () { if (c.parentNode) c.parentNode.removeChild(c); }, 4000);
+      })();
+    }
+  }
+
+  // ══════════════════════════════════════════
+  // MODO 1: VISUAL
+  // ══════════════════════════════════════════
+  var slider = document.getElementById('vis-slider');
+
+  function visRender(val) {
+    // val en centésimas (0-299)
+    var entero = Math.floor(val / 100);
+    var decimas = Math.floor((val % 100) / 10);
+    var centesimas = val % 10;
+
+    // Número grande
+    var c = val % 100;
+    document.getElementById('vis-int').textContent = entero;
+    document.getElementById('vis-dec').textContent = (c < 10 ? '0' + c : String(c));
+
+    // Cuadrícula 10×10 (100 celdas por entero, mostramos hasta 2 enteros)
+    var grid = document.getElementById('vis-grid');
+    grid.innerHTML = '';
+
+    // Caja de enteros
+    (function () {
+      var box = document.createElement('div');
+      box.className = 'grid-box';
+      var lbl = document.createElement('div');
+      lbl.className = 'grid-label';
+      lbl.textContent = entero > 0 ? (entero === 1 ? '1 entero' : entero + ' enteros') : '0 enteros';
+      box.appendChild(lbl);
+      var g = document.createElement('div');
+      g.className = 'dec-grid';
+      for (var i = 0; i < 100; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'dec-cell ' + (i < entero * 100 / 2 && entero > 0 ? 'lit-int' : 'unlit');
+        // Simplificado: mostramos enteros como cuadrícula llena
+        cell.className = 'dec-cell ' + (entero > 0 && i < 100 ? 'lit-int' : 'unlit');
+        // Solo mostramos 1 cuadrícula de entero si hay al menos 1
+        cell.className = 'dec-cell ' + (i < (entero > 0 ? 100 : 0) ? 'lit-int' : 'unlit');
+        g.appendChild(cell);
+      }
+      box.appendChild(g);
+      grid.appendChild(box);
+    })();
+
+    // Caja de décimas (10 celdas)
+    (function () {
+      var box = document.createElement('div');
+      box.className = 'grid-box';
+      var lbl = document.createElement('div');
+      lbl.className = 'grid-label';
+      lbl.textContent = decimas + (decimas === 1 ? ' décima' : ' décimas');
+      box.appendChild(lbl);
+      var g = document.createElement('div');
+      g.className = 'dec-grid';
+      g.style.gridTemplateColumns = 'repeat(10,1fr)';
+      for (var i = 0; i < 10; i++) {
+        var cell = document.createElement('div');
+        cell.style.width = '20px'; cell.style.height = '20px';
+        cell.className = 'dec-cell ' + (i < decimas ? 'lit-dec' : 'unlit');
+        g.appendChild(cell);
+      }
+      box.appendChild(g);
+      grid.appendChild(box);
+    })();
+
+    // Caja de centésimas (10 celdas)
+    (function () {
+      var box = document.createElement('div');
+      box.className = 'grid-box';
+      var lbl = document.createElement('div');
+      lbl.className = 'grid-label';
+      lbl.textContent = centesimas + (centesimas === 1 ? ' centésima' : ' centésimas');
+      box.appendChild(lbl);
+      var g = document.createElement('div');
+      g.className = 'dec-grid';
+      g.style.gridTemplateColumns = 'repeat(10,1fr)';
+      for (var i = 0; i < 10; i++) {
+        var cell = document.createElement('div');
+        cell.style.width = '20px'; cell.style.height = '20px';
+        cell.className = 'dec-cell ' + (i < centesimas ? 'lit-cen' : 'unlit');
+        g.appendChild(cell);
+      }
+      box.appendChild(g);
+      grid.appendChild(box);
+    })();
+
+    // Recta numérica SVG
+    var svg = document.getElementById('nl-svg');
+    var w = 320; var h = 52;
+    var lo = entero; var hi = entero + 1;
+    var pct = (val % 100) / 100;
+    var markerX = 20 + pct * 280;
+
+    var ticks = '';
+    for (var i = 0; i <= 10; i++) {
+      var x = 20 + i * 28;
+      var isMajor = i === 0 || i === 10;
+      ticks += '<line x1="' + x + '" y1="' + (isMajor ? 14 : 20) + '" x2="' + x + '" y2="32" stroke="#3a1f0a" stroke-width="' + (isMajor ? 2 : 1) + '" opacity="' + (isMajor ? 0.8 : 0.4) + '"/>';
+      if (i === 0 || i === 10) {
+        ticks += '<text x="' + x + '" y="44" text-anchor="middle" font-family="Fraunces,serif" font-size="13" font-weight="700" fill="#3a1f0a">' + (i === 0 ? lo : hi) + '</text>';
+      } else {
+        ticks += '<text x="' + x + '" y="42" text-anchor="middle" font-family="Fraunces,serif" font-size="9" fill="#5c3a1a" opacity="0.6">' + lo + ',' + (i < 10 ? i : 0) + '</text>';
+      }
+    }
+
+    svg.innerHTML =
+      '<line x1="16" y1="26" x2="304" y2="26" stroke="#3a1f0a" stroke-width="2" stroke-linecap="round"/>' +
+      ticks +
+      '<circle cx="' + markerX + '" cy="26" r="8" fill="#d94a2c" stroke="#6b1a0c" stroke-width="1.5"/>' +
+      '<text x="' + markerX + '" y="12" text-anchor="middle" font-family="Fraunces,serif" font-size="11" font-weight="700" fill="#a02818">' + fmtDec(val) + '</text>';
+
+    // Explicación
+    var parts = [];
+    if (entero > 0) parts.push(entero + (entero === 1 ? ' entero' : ' enteros'));
+    if (decimas > 0) parts.push(decimas + (decimas === 1 ? ' décima' : ' décimas'));
+    if (centesimas > 0) parts.push(centesimas + (centesimas === 1 ? ' centésima' : ' centésimas'));
+    if (parts.length === 0) parts.push('cero');
+    document.getElementById('vis-explain').textContent = parts.join(' · ');
+  }
+
+  slider.addEventListener('input', function () { visRender(parseInt(this.value, 10)); });
+  visRender(135);
+
+  // ══════════════════════════════════════════
+  // MODO 2: COMPARAR
+  // ══════════════════════════════════════════
+  var cmpState = { a: 135, b: 153, ok: 0, tot: 0, locked: false };
+
+  var CMP_PAIRS = [
+    [120,210],[135,153],[205,250],[310,301],[099,100],
+    [150,105],[175,157],[230,203],[088,880],[067,076],
+    [199,200],[250,025],[305,350],[412,421],[500,050],
+    [111,110],[099,099],[260,206],[175,175],[324,342]
+  ];
+
+  function cmpNew() {
+    cmpState.locked = false;
+    var p = CMP_PAIRS[rand(0, CMP_PAIRS.length - 1)];
+    if (Math.random() > 0.5) { cmpState.a = p[0]; cmpState.b = p[1]; }
+    else { cmpState.a = p[1]; cmpState.b = p[0]; }
+
+    function renderDec(id, val, color) {
+      var e = Math.floor(val / 100);
+      var c = val % 100;
+      var dec = (c < 10 ? '0' + c : String(c));
+      document.getElementById(id).innerHTML = e + '<span class="d">,' + dec + '</span>';
+    }
+    renderDec('cmp-a', cmpState.a, '#d94a2c');
+    renderDec('cmp-b', cmpState.b, '#2c5282');
+
+    var maxV = Math.max(cmpState.a, cmpState.b, 1);
+    document.getElementById('cmp-bar-a').style.width = (cmpState.a / maxV * 100) + '%';
+    document.getElementById('cmp-bar-b').style.width = (cmpState.b / maxV * 100) + '%';
+    document.getElementById('cmp-sym').textContent = '?';
+
+    ['sym-lt','sym-eq','sym-gt'].forEach(function (id) {
+      document.getElementById(id).className = 'sym-btn';
+    });
+    document.getElementById('cmp-feedback').textContent = 'Mira las barras y elige < = >';
+    document.getElementById('cmp-feedback').className = 'feedback';
+  }
+
+  function cmpCheck(sym) {
+    if (cmpState.locked) return;
+    var correct;
+    if (cmpState.a < cmpState.b) correct = 'lt';
+    else if (cmpState.a > cmpState.b) correct = 'gt';
+    else correct = 'eq';
+
+    cmpState.tot++;
+    document.getElementById('cmp-tot').textContent = cmpState.tot;
+
+    var symbols = { lt: '<', eq: '=', gt: '>' };
+    document.getElementById('cmp-sym').textContent = symbols[correct];
+
+    var fb = document.getElementById('cmp-feedback');
+    if (sym === correct) {
+      cmpState.ok++;
+      document.getElementById('cmp-ok').textContent = cmpState.ok;
+      document.getElementById('sym-' + sym).classList.add('correct');
+      fb.textContent = '¡Correcto! ' + fmtDec(cmpState.a) + ' ' + symbols[correct] + ' ' + fmtDec(cmpState.b);
+      fb.className = 'feedback success';
+      celebrate(false);
+      cmpState.locked = true;
+      setTimeout(cmpNew, 1800);
+    } else {
+      document.getElementById('sym-' + sym).classList.add('wrong');
+      document.getElementById('sym-' + correct).classList.add('correct');
+      fb.textContent = 'Era ' + symbols[correct] + '. Fíjate en las décimas primero.';
+      fb.className = 'feedback wrong';
+      cmpState.locked = true;
+      setTimeout(cmpNew, 2200);
+    }
+  }
+
+  document.getElementById('sym-lt').addEventListener('click', function () { cmpCheck('lt'); });
+  document.getElementById('sym-eq').addEventListener('click', function () { cmpCheck('eq'); });
+  document.getElementById('sym-gt').addEventListener('click', function () { cmpCheck('gt'); });
+  document.getElementById('btn-new-cmp').addEventListener('click', cmpNew);
+  cmpNew();
+
+  // ══════════════════════════════════════════
+  // MODO 3: OPERACIONES
+  // ══════════════════════════════════════════
+  var opsState = { a: 240, b: 130, type: 'sum', answer: '', locked: false };
+
+  // Construir teclado
+  (function () {
+    var kp = document.getElementById('ops-keypad');
+    kp.innerHTML = '';
+    var keys = ['1','2','3','4','5','6','7','8','9',',','0'];
+    for (var i = 0; i < keys.length; i++) {
+      (function (k) {
+        var btn = document.createElement('button');
+        btn.className = 'key' + (k === ',' ? ' dot' : '');
+        btn.textContent = k;
+        btn.addEventListener('click', function () {
+          if (opsState.locked) return;
+          if (k === ',') {
+            if (opsState.answer.indexOf(',') !== -1) return;
+            if (!opsState.answer) opsState.answer = '0';
+            opsState.answer += ',';
+          } else {
+            var parts = opsState.answer.split(',');
+            if (parts.length === 2 && parts[1].length >= 2) return;
+            if (parts[0].length >= 3 && parts.length === 1) return;
+            opsState.answer += k;
+          }
+          updateOpsDisplay();
+        });
+        kp.appendChild(btn);
+      })(keys[i]);
+    }
+  })();
+
+  document.getElementById('ops-back').addEventListener('click', function () {
+    if (opsState.locked) return;
+    opsState.answer = opsState.answer.slice(0, -1);
+    updateOpsDisplay();
+  });
+
+  document.getElementById('ops-check').addEventListener('click', function () {
+    if (opsState.locked || !opsState.answer) return;
+    var raw = opsState.answer.replace(',', '.');
+    var given = Math.round(parseFloat(raw) * 100);
+    var correct = opsState.type === 'sum' ? opsState.a + opsState.b : opsState.a - opsState.b;
+    var fb = document.getElementById('ops-feedback');
+
+    if (given === correct) {
+      opsState.locked = true;
+      document.getElementById('op-result-display').innerHTML = fmtDec(correct).replace(',', '<span class="d">,') + '</span>';
+      fb.textContent = '¡Correcto! ' + fmtDec(opsState.a) + (opsState.type === 'sum' ? ' + ' : ' − ') + fmtDec(opsState.b) + ' = ' + fmtDec(correct);
+      fb.className = 'feedback success';
+      celebrate(false);
+      setTimeout(opsNew, 2000);
+    } else {
+      fb.textContent = 'No es ' + fmtDec(given) + '… alinea las comas y suma cifra a cifra';
+      fb.className = 'feedback wrong';
+      document.getElementById('ops-answer').classList.add('shake');
+      setTimeout(function () { document.getElementById('ops-answer').classList.remove('shake'); }, 400);
+      opsState.answer = '';
+      updateOpsDisplay();
+    }
+  });
+
+  function updateOpsDisplay() {
+    var el = document.getElementById('ops-answer');
+    if (!opsState.answer) {
+      el.textContent = '_ , _ _';
+      el.className = 'answer-display empty';
+    } else {
+      el.textContent = opsState.answer;
+      el.className = 'answer-display';
+    }
+  }
+
+  function renderOpsNumbers() {
+    function numHTML(v) {
+      var e = Math.floor(v / 100);
+      var c = v % 100;
+      return e + '<span class="d">,' + (c < 10 ? '0' + c : String(c)) + '</span>';
+    }
+    document.getElementById('op-a').innerHTML = numHTML(opsState.a);
+    document.getElementById('op-b').innerHTML = numHTML(opsState.b);
+    document.getElementById('op-sign').textContent = opsState.type === 'sum' ? '+' : '−';
+    document.getElementById('op-result-display').textContent = '?';
+    document.getElementById('op-result-display').style.color = 'var(--green)';
+  }
+
+  function opsNew() {
+    opsState.locked = false;
+    opsState.answer = '';
+
+    if (opsState.type === 'sum') {
+      // Suma sin que pase de 9,99
+      var a, b;
+      do {
+        a = rand(10, 499); // en centésimas
+        b = rand(10, 499);
+      } while (a + b > 999);
+      opsState.a = a; opsState.b = b;
+    } else {
+      // Resta: siempre positiva
+      var x = rand(50, 899);
+      var y = rand(10, x - 10);
+      opsState.a = x; opsState.b = y;
+    }
+
+    renderOpsNumbers();
+    updateOpsDisplay();
+    document.getElementById('ops-feedback').textContent = 'Calcula el resultado con decimales';
+    document.getElementById('ops-feedback').className = 'feedback';
+  }
+
+  document.getElementById('op-sum').addEventListener('click', function () {
+    opsState.type = 'sum';
+    this.classList.add('active');
+    document.getElementById('op-sub').classList.remove('active');
+    opsNew();
+  });
+  document.getElementById('op-sub').addEventListener('click', function () {
+    opsState.type = 'sub';
+    this.classList.add('active');
+    document.getElementById('op-sum').classList.remove('active');
+    opsNew();
+  });
+  document.getElementById('btn-new-ops').addEventListener('click', opsNew);
+  opsNew();
+
+  // ══════════════════════════════════════════
+  // SELECTOR MODO
+  // ══════════════════════════════════════════
+  function setMode(m) { if(window.switchTab) switchTab(m); }
+
+  document.getElementById('btn-visual').addEventListener('click', function () { setMode('visual'); });
+  document.getElementById('btn-compare').addEventListener('click', function () { setMode('compare'); });
+  document.getElementById('btn-ops').addEventListener('click', function () { setMode('ops'); });
+  
+
+  // ══ BANNER FINAL ══
+  setTimeout(function () {
+    var banner = document.getElementById('complete-banner');
+    banner.style.display = 'block';
+    banner.classList.add('pop-anim');
+    celebrate(true);
+  }, 800);
+
+})();
+
+  function switchTab(m) {
+    ['visual','compare','ops','info-decimales'].forEach(function(x) {
+      var b = document.getElementById('btn-' + x);
+      var p = document.getElementById('mode-' + x);
+      if(b) { b.style.background='rgba(255,255,255,.1)'; b.style.color='rgba(237,224,196,.6)'; b.style.borderColor='rgba(255,255,255,.1)'; }
+      if(p) p.classList.remove('active');
+    });
+    var ab = document.getElementById('btn-' + m);
+    var ap = document.getElementById('mode-' + m);
+    if(ab) { ab.style.background='linear-gradient(180deg,#c89968,#8b5a2b)'; ab.style.color='#1a0a06'; ab.style.borderColor='#c89968'; }
+    if(ap) ap.classList.add('active');
+  }
+  switchTab('visual');
+</script>
+
+
+</body>
+</html>
