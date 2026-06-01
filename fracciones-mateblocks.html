@@ -93,39 +93,47 @@
   .bar-svg { width: 100%; height: 44px; }
 
   /* ── COMPARAR ── */
-  .compare-area {
-    display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px;
-    align-items: center; margin-bottom: 14px;
+  /* ── COMPARAR: pizzas arriba, opciones tipo quiz debajo ── */
+  .compare-area { display: flex; flex-direction: column; align-items: center; margin-bottom: 10px; width: 100%; }
+  .compare-pizzas-row {
+    display: flex; flex-direction: row; align-items: center;
+    justify-content: center; gap: 8px; width: 100%; margin-bottom: 14px;
   }
   .compare-frac {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1;
   }
-  .compare-pizza { width: min(110px, 28vw); height: min(110px, 28vw); }
+  .compare-pizza { width: min(120px, 32vw); height: min(120px, 32vw); }
   .compare-label {
-    font-family: 'Fraunces', serif; font-size: 28px; font-weight: 800; color: var(--ink);
+    font-family: 'Fraunces', serif; font-size: 26px; font-weight: 800; color: var(--ink);
     display: flex; flex-direction: column; align-items: center;
   }
-  .compare-label .fn { color: var(--accent); font-size: 30px; }
-  .compare-label .fl { width: 32px; height: 3px; background: var(--ink); border-radius: 2px; margin: 2px 0; }
-  .compare-label .fd { color: var(--blue); font-size: 30px; }
-
-  .compare-symbol-area { text-align: center; }
-  .compare-btns { display: flex; flex-direction: column; gap: 8px; align-items: center; }
-  .sym-btn {
-    width: 52px; height: 52px; border-radius: 50%; border: 0;
-    font-family: 'Fraunces', serif; font-size: 28px; font-weight: 800;
-    background: linear-gradient(180deg, #fdf2dc, #d9c8a4); color: var(--ink);
-    cursor: pointer; box-shadow: 0 2px 0 var(--wood-1), 0 3px 6px rgba(0,0,0,0.25);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .sym-btn:active { transform: scale(0.93); }
-  .sym-btn.correct { background: linear-gradient(180deg, #d4edcf, #b8ddb2); border: 2px solid var(--green); }
-  .sym-btn.wrong   { background: linear-gradient(180deg, #f5d0cc, #e8b0aa); border: 2px solid var(--accent); }
+  .compare-label .fn { color: var(--accent); font-size: 28px; }
+  .compare-label .fl { width: 28px; height: 3px; background: var(--ink); border-radius: 2px; margin: 2px 0; }
+  .compare-label .fd { color: var(--blue); font-size: 28px; }
   .compare-result {
-    font-family: 'Fraunces', serif; font-size: 40px; font-weight: 800;
-    color: var(--wood-2); min-height: 48px;
+    font-family: 'Fraunces', serif; font-size: 36px; font-weight: 800;
+    color: var(--wood-2); min-height: 40px; padding: 0 6px;
     display: flex; align-items: center; justify-content: center;
   }
+  /* Botones quiz tipo frase completa */
+  .quiz-btns { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .quiz-btn {
+    width: 100%; border: 2.5px solid rgba(74,40,16,0.15); border-radius: 16px; padding: 12px 10px;
+    font-family: 'Fraunces', serif; font-size: 20px; font-weight: 800;
+    background: linear-gradient(180deg, #fdf2dc, #e8d8b0); color: var(--ink);
+    cursor: pointer; box-shadow: 0 4px 0 var(--wood-1), 0 5px 10px rgba(0,0,0,0.2);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .quiz-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--wood-1); }
+  .quiz-btn .qf { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+  .quiz-btn .qn { color: var(--accent); font-size: 22px; }
+  .quiz-btn .ql { width: 22px; height: 2.5px; background: var(--ink); border-radius: 2px; margin: 2px 0; }
+  .quiz-btn .qd { color: var(--blue); font-size: 22px; }
+  .quiz-btn .qsym { font-size: 26px; color: var(--wood-2); padding: 0 4px; min-width: 32px; text-align: center; }
+  .quiz-btn.correct { background: linear-gradient(180deg, #d4edcf, #b8ddb2); border-color: var(--green); box-shadow: 0 4px 0 #2a5028; }
+  .quiz-btn.wrong   { background: linear-gradient(180deg, #f5d0cc, #e8b0aa); border-color: var(--accent); box-shadow: 0 4px 0 #6b1a0c; }
+  /* mantener sym-btn por si acaso el JS lo referencia */
+  .sym-btn { display: none; }
 
   .score-bar {
     display: flex; justify-content: center; gap: 16px; margin-bottom: 10px;
@@ -305,30 +313,31 @@
     <div class="section-label">¿Cuál fracción es mayor?</div>
 
     <div class="compare-area">
-      <div class="compare-frac">
-        <svg class="compare-pizza" id="cmp-pizza-a" viewBox="0 0 200 200"></svg>
-        <div class="compare-label">
-          <div class="fn" id="cmp-an">1</div>
-          <div class="fl"></div>
-          <div class="fd" id="cmp-ad">2</div>
+      <div class="compare-pizzas-row">
+        <div class="compare-frac">
+          <svg class="compare-pizza" id="cmp-pizza-a" viewBox="0 0 200 200"></svg>
+          <div class="compare-label">
+            <div class="fn" id="cmp-an">1</div>
+            <div class="fl"></div>
+            <div class="fd" id="cmp-ad">2</div>
+          </div>
         </div>
-      </div>
-      <div class="compare-symbol-area">
         <div class="compare-result" id="cmp-result">?</div>
-        <div class="compare-btns">
-          <button class="sym-btn" id="sym-lt">&lt;</button>
-          <button class="sym-btn" id="sym-eq">=</button>
-          <button class="sym-btn" id="sym-gt">&gt;</button>
+        <div class="compare-frac">
+          <svg class="compare-pizza" id="cmp-pizza-b" viewBox="0 0 200 200"></svg>
+          <div class="compare-label">
+            <div class="fn" id="cmp-bn">1</div>
+            <div class="fl"></div>
+            <div class="fd" id="cmp-bd">4</div>
+          </div>
         </div>
       </div>
-      <div class="compare-frac">
-        <svg class="compare-pizza" id="cmp-pizza-b" viewBox="0 0 200 200"></svg>
-        <div class="compare-label">
-          <div class="fn" id="cmp-bn">1</div>
-          <div class="fl"></div>
-          <div class="fd" id="cmp-bd">4</div>
-        </div>
-      </div>
+      <!-- Botones ocultos para compatibilidad JS -->
+      <button class="sym-btn" id="sym-lt" style="display:none"></button>
+      <button class="sym-btn" id="sym-eq" style="display:none"></button>
+      <button class="sym-btn" id="sym-gt" style="display:none"></button>
+      <!-- Botones quiz tipo frase completa -->
+      <div class="quiz-btns" id="quiz-btns"></div>
     </div>
 
     <div class="feedback" id="cmp-feedback">Mira las pizzas y elige &lt; = &gt;</div>
@@ -553,15 +562,33 @@
     document.getElementById('cmp-ad').textContent = cmpState.ad;
     document.getElementById('cmp-bn').textContent = cmpState.bn;
     document.getElementById('cmp-bd').textContent = cmpState.bd;
-    document.getElementById('cmp-result').textContent = '?';
+    document.getElementById('cmp-result').textContent = '';
 
     drawPizza('cmp-pizza-a', cmpState.an, cmpState.ad, '#d94a2c');
     drawPizza('cmp-pizza-b', cmpState.bn, cmpState.bd, '#2c5282');
 
-    ['sym-lt','sym-eq','sym-gt'].forEach(function (id) {
-      document.getElementById(id).className = 'sym-btn';
+    // Construir botones quiz con frase completa, orden aleatorio
+    var container = document.getElementById('quiz-btns');
+    container.innerHTML = '';
+    var options = [
+      { sym: 'lt', label: '&lt;' },
+      { sym: 'eq', label: '=' },
+      { sym: 'gt', label: '&gt;' }
+    ];
+    options = options.sort(function() { return Math.random() - 0.5; });
+    options.forEach(function(opt) {
+      var btn = document.createElement('button');
+      btn.className = 'quiz-btn';
+      btn.innerHTML =
+        '<div class="qf"><div class="qn">' + cmpState.an + '</div><div class="ql"></div><div class="qd">' + cmpState.ad + '</div></div>' +
+        '<span class="qsym">' + opt.label + '</span>' +
+        '<div class="qf"><div class="qn">' + cmpState.bn + '</div><div class="ql"></div><div class="qd">' + cmpState.bd + '</div></div>';
+      btn.setAttribute('data-sym', opt.sym);
+      (function(s) { btn.addEventListener('click', function() { cmpCheck(s); }); })(opt.sym);
+      container.appendChild(btn);
     });
-    document.getElementById('cmp-feedback').textContent = 'Mira las pizzas y elige < = >';
+
+    document.getElementById('cmp-feedback').textContent = '¿Qué símbolo va entre las dos fracciones?';
     document.getElementById('cmp-feedback').className = 'feedback';
   }
 
@@ -581,28 +608,31 @@
     document.getElementById('cmp-result').textContent = symbols[correct];
 
     var fb = document.getElementById('cmp-feedback');
+    var btns = document.querySelectorAll('.quiz-btn');
+
+    btns.forEach(function(b) { b.style.pointerEvents = 'none'; });
+
     if (sym === correct) {
       cmpState.correct++;
       document.getElementById('cmp-correct').textContent = cmpState.correct;
-      document.getElementById('sym-' + sym).classList.add('correct');
+      btns.forEach(function(b) { if (b.getAttribute('data-sym') === correct) b.classList.add('correct'); });
       fb.textContent = '¡Correcto! ' + cmpState.an + '/' + cmpState.ad + ' ' + symbols[correct] + ' ' + cmpState.bn + '/' + cmpState.bd;
       fb.className = 'feedback success';
       celebrate();
       cmpState.locked = true;
       setTimeout(cmpNew, 1800);
     } else {
-      document.getElementById('sym-' + sym).classList.add('wrong');
-      document.getElementById('sym-' + correct).classList.add('correct');
+      btns.forEach(function(b) {
+        var s = b.getAttribute('data-sym');
+        if (s === correct) b.classList.add('correct');
+        else if (s === sym) b.classList.add('wrong');
+      });
       fb.textContent = 'Era ' + symbols[correct] + '. Mira el tamaño de cada trozo.';
       fb.className = 'feedback wrong';
       cmpState.locked = true;
       setTimeout(cmpNew, 2200);
     }
   }
-
-  document.getElementById('sym-lt').addEventListener('click', function () { cmpCheck('lt'); });
-  document.getElementById('sym-eq').addEventListener('click', function () { cmpCheck('eq'); });
-  document.getElementById('sym-gt').addEventListener('click', function () { cmpCheck('gt'); });
   document.getElementById('btn-new-cmp').addEventListener('click', cmpNew);
 
   cmpNew();
