@@ -807,9 +807,9 @@
   function scheduleLoop(startTime){
     if(!playing) return;
     var a=getAC(),t=startTime,loopDur=0;
-    MELODY.forEach(function(n){ playNote(n[0],n[1],t,'square',0.08,a);t+=n[1];loopDur+=n[1]; });
+    MELODY.forEach(function(n){ playNote(n[0],n[1],t,'square',0.03,a);t+=n[1];loopDur+=n[1]; });
     var tb=startTime;
-    BASS.forEach(function(n){ playNote(n[0],n[1],tb,'triangle',0.06,a);tb+=n[1]; });
+    BASS.forEach(function(n){ playNote(n[0],n[1],tb,'triangle',0.02,a);tb+=n[1]; });
     scheduleTimer=setTimeout(function(){ scheduleLoop(startTime+loopDur); },(loopDur-0.3)*1000);
   }
   function startMusic(){
