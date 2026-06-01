@@ -313,27 +313,42 @@
   }
 
   // ── SVG MONEDA ──
-  function coinSVG(coin, size) {
-    size = size || 44;
-    var cx = size / 2; var cy = size / 2; var r = size / 2 - 2;
-    var outer = coin.gold ? '#c8921a' : '#808090';
-    var mid   = coin.gold ? '#d4a830' : '#a0a0b0';
-    var light = coin.gold ? '#f0c848' : '#c8c8d8';
-    var text  = coin.label;
-    var fs = size < 36 ? 8 : 10;
-
-    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" xmlns="http://www.w3.org/2000/svg">' +
-      '<defs>' +
-      '<radialGradient id="cg' + coin.val + '" cx="35%" cy="30%" r="70%">' +
-      '<stop offset="0%" stop-color="' + light + '"/>' +
-      '<stop offset="50%" stop-color="' + mid + '"/>' +
-      '<stop offset="100%" stop-color="' + outer + '"/>' +
-      '</radialGradient></defs>' +
-      '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="url(#cg' + coin.val + ')" stroke="' + outer + '" stroke-width="1.5"/>' +
-      '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.75) + '" fill="none" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>' +
-      '<ellipse cx="' + (cx * 0.7) + '" cy="' + (cy * 0.6) + '" rx="' + (r * 0.3) + '" ry="' + (r * 0.12) + '" fill="rgba(255,255,255,0.35)" transform="rotate(-30 ' + (cx*0.7) + ' ' + (cy*0.6) + ')"/>' +
-      '<text x="' + cx + '" y="' + (cy + fs * 0.4) + '" text-anchor="middle" font-family="Fraunces,serif" font-weight="700" font-size="' + fs + '" fill="rgba(40,20,5,0.85)">' + text + '</text>' +
-      '</svg>';
+  function coinSVG(coin,size){
+  size=size||44;
+  var cx=size/2,cy=size/2,r=size/2-1.5;
+  var fs=size<36?7:9;
+  var id='cg'+coin.val+'s'+size;
+  var svg='<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'" xmlns="http://www.w3.org/2000/svg"><defs>';
+  if(coin.val<=5){
+    var c1='#f4a460',c2='#cd7f32',c3='#8b4513';
+    svg+='<radialGradient id="'+id+'" cx="35%" cy="28%" r="70%"><stop offset="0%" stop-color="'+c1+'"/><stop offset="55%" stop-color="'+c2+'"/><stop offset="100%" stop-color="'+c3+'"/></radialGradient></defs>';
+    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="url(#'+id+')" stroke="'+c3+'" stroke-width="1.2"/>';
+    svg+='<ellipse cx="'+(cx*0.65)+'" cy="'+(cy*0.58)+'" rx="'+(r*0.28)+'" ry="'+(r*0.1)+'" fill="rgba(255,220,180,0.4)" transform="rotate(-30 '+(cx*0.65)+' '+(cy*0.58)+')"/>';
+    svg+='<text x="'+cx+'" y="'+(cy+fs*0.42)+'" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="'+fs+'" fill="rgba(80,30,5,0.9)">'+coin.label+'</text>';
+  } else if(coin.val<=50){
+    var d1='#f0d060',d2='#c8a020',d3='#8a6808';
+    svg+='<radialGradient id="'+id+'" cx="35%" cy="28%" r="70%"><stop offset="0%" stop-color="'+d1+'"/><stop offset="55%" stop-color="'+d2+'"/><stop offset="100%" stop-color="'+d3+'"/></radialGradient></defs>';
+    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="url(#'+id+')" stroke="'+d3+'" stroke-width="1.2"/>';
+    if(coin.val===50){svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(r-2)+'" fill="none" stroke="rgba(0,0,0,0.1)" stroke-width="1.5" stroke-dasharray="3,2"/>';}
+    svg+='<ellipse cx="'+(cx*0.65)+'" cy="'+(cy*0.58)+'" rx="'+(r*0.28)+'" ry="'+(r*0.1)+'" fill="rgba(255,245,180,0.45)" transform="rotate(-30 '+(cx*0.65)+' '+(cy*0.58)+')"/>';
+    svg+='<text x="'+cx+'" y="'+(cy+fs*0.42)+'" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="'+fs+'" fill="rgba(60,38,0,0.9)">'+coin.label+'</text>';
+  } else if(coin.val===100){
+    var ri=r*0.62;
+    svg+='<radialGradient id="'+id+'o" cx="35%" cy="28%" r="70%"><stop offset="0%" stop-color="#f0d060"/><stop offset="55%" stop-color="#c8a020"/><stop offset="100%" stop-color="#8a6808"/></radialGradient><radialGradient id="'+id+'i" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#e8eef4"/><stop offset="50%" stop-color="#b0bcc8"/><stop offset="100%" stop-color="#6a7880"/></radialGradient></defs>';
+    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="url(#'+id+'o)" stroke="#6a5008" stroke-width="1.2"/>';
+    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+ri+'" fill="url(#'+id+'i)" stroke="#8090a0" stroke-width="1"/>';
+    svg+='<ellipse cx="'+(cx*0.72)+'" cy="'+(cy*0.65)+'" rx="'+(ri*0.35)+'" ry="'+(ri*0.12)+'" fill="rgba(255,255,255,0.3)" transform="rotate(-30 '+(cx*0.72)+' '+(cy*0.65)+')"/>';
+    svg+='<text x="'+cx+'" y="'+(cy+fs*0.42)+'" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="'+fs+'" fill="rgba(30,50,70,0.9)">1 €</text>';
+  } else {
+    var ri2=r*0.62;
+    svg+='<radialGradient id="'+id+'o" cx="35%" cy="28%" r="70%"><stop offset="0%" stop-color="#e8eef4"/><stop offset="50%" stop-color="#b0bcc8"/><stop offset="100%" stop-color="#6a7880"/></radialGradient><radialGradient id="'+id+'i" cx="38%" cy="30%" r="65%"><stop offset="0%" stop-color="#f0d060"/><stop offset="50%" stop-color="#c8a020"/><stop offset="100%" stop-color="#8a6808"/></radialGradient></defs>';
+    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="url(#'+id+'o)" stroke="#6a7880" stroke-width="1.2"/>';
+    svg+='<circle cx="'+cx+'" cy="'+cy+'" r="'+ri2+'" fill="url(#'+id+'i)" stroke="#a08010" stroke-width="1"/>';
+    svg+='<ellipse cx="'+(cx*0.72)+'" cy="'+(cy*0.65)+'" rx="'+(ri2*0.35)+'" ry="'+(ri2*0.12)+'" fill="rgba(255,245,180,0.3)" transform="rotate(-30 '+(cx*0.72)+' '+(cy*0.65)+')"/>';
+    svg+='<text x="'+cx+'" y="'+(cy+fs*0.42)+'" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="'+fs+'" fill="rgba(60,38,0,0.9)">2 €</text>';
+  }
+  svg+='</svg>';
+  return svg;
   }
 
   // ── CONSTRUIR PALETA ──
