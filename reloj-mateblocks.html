@@ -41,8 +41,8 @@ body{font-family:'DM Sans',sans-serif;
   border-radius:999px;transition:left .3s cubic-bezier(.5,0,.2,1);
   box-shadow:0 2px 6px rgba(0,0,0,.5);}
 
-/* RELOJ SVG */
-.clock-wrap{width:min(280px,82vw);height:min(280px,82vw);margin-bottom:14px;
+/* RELOJ SVG — FIX: margin:0 auto centra en todos los paneles */
+.clock-wrap{width:min(280px,82vw);height:min(280px,82vw);margin:0 auto 14px;
   cursor:grab;touch-action:none;user-select:none;}
 
 /* Display digital */
@@ -62,10 +62,10 @@ body{font-family:'DM Sans',sans-serif;
 .btn-s{background:linear-gradient(180deg,#c89968,#8b5a2b 70%,#4a2810);
   color:#fdf2dc;box-shadow:0 2px 0 #2a1808;}
 
-/* RETO */
-.reto-wrap{width:100%;}
+/* RETO — FIX: flex+align-items centra todos los hijos incluido el reloj */
+.reto-wrap{width:100%;display:flex;flex-direction:column;align-items:center;}
 .progress-bar{background:rgba(255,255,255,.1);border-radius:99px;height:8px;
-  margin-bottom:14px;overflow:hidden;}
+  margin-bottom:14px;overflow:hidden;width:100%;}
 .progress-fill{height:100%;background:linear-gradient(90deg,#c89968,#d94a2c);
   border-radius:99px;transition:width .4s;}
 .progress-label{font-size:11px;color:rgba(237,224,196,.6);text-align:center;
@@ -126,10 +126,10 @@ body{font-family:'DM Sans',sans-serif;
 .confetti{position:fixed;width:12px;height:12px;pointer-events:none;
   z-index:999;animation:float-up 2.5s ease-out forwards;}
 
-  header { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 480px; margin-bottom: 10px; z-index: 1; }
-  .logo { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 800; color: #ede0c4; letter-spacing: -0.5px; }
-  .logo span { color: #d94a2c; }
-  .module-name { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: #c89968; font-weight: 500; opacity: 0.85; }
+header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:480px;margin-bottom:10px;z-index:1;}
+.logo{font-family:'Fraunces',serif;font-size:22px;font-weight:800;color:#ede0c4;letter-spacing:-0.5px;}
+.logo span{color:#d94a2c;}
+.module-name{font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:#c89968;font-weight:500;opacity:0.85;}
 </style>
 </head>
 <body>
@@ -137,7 +137,6 @@ body{font-family:'DM Sans',sans-serif;
   <div class="logo">Mate<span>Blocks</span></div>
   <div class="module-name">El Reloj · 1/10</div>
 </header>
-
 
 <!-- TABS -->
 <div class="tabs">
@@ -278,12 +277,8 @@ var NOMBRES = ['doce','una','dos','tres','cuatro','cinco','seis','siete','ocho',
 var ROMAN   = ['XII','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
 var ARABIC  = ['12','1','2','3','4','5','6','7','8','9','10','11'];
 
-// Estado modo libre
 var libre = { h:3, m:0, mode:'num', dragging:null };
-
-// Estado reto 1
 var r1 = { q:0, aciertos:0, respondida:false };
-// Estado reto 2
 var r2 = { q:0, aciertos:0, h:0, m:0, targetH:0, targetM:0, dragging:null };
 
 var PREGUNTAS = [
@@ -352,7 +347,6 @@ function setHands(hEl, mEl, h, m){
   mEl.setAttribute('transform','rotate('+mDeg+' 100 100)');
 }
 
-// Init todos los relojes
 buildTicks(document.getElementById('ticks-l'));
 buildTicks(document.getElementById('ticks-r1'));
 buildTicks(document.getElementById('ticks-r2'));
@@ -368,7 +362,6 @@ function updateLibre(){
 }
 updateLibre();
 
-// Drag libre
 function getAngle(e, svgEl){
   var rect=svgEl.getBoundingClientRect();
   var cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
@@ -425,7 +418,6 @@ document.addEventListener('touchmove',function(e){
 document.addEventListener('mouseup',function(){ libre.dragging=null; });
 document.addEventListener('touchend',function(){ libre.dragging=null; });
 
-// Drag reto2
 var wrapR2=document.getElementById('clock-r2');
 var svgR2=document.getElementById('svg-r2');
 
@@ -476,7 +468,6 @@ document.addEventListener('touchmove',function(e){
 document.addEventListener('mouseup',function(){ r2.dragging=null; });
 document.addEventListener('touchend',function(){ r2.dragging=null; });
 
-// Tabs
 window.showTab = function(tab){
   ['libre','reto1','reto2','info'].forEach(function(t){
     document.getElementById('panel-'+t).classList.remove('show');
@@ -488,7 +479,6 @@ window.showTab = function(tab){
   if(tab==='reto2' && r2.q===0) initReto2();
 };
 
-// Modo números/romanos
 window.setMode = function(m){
   libre.mode=m;
   document.getElementById('btn-num').classList.toggle('active',m==='num');
@@ -509,7 +499,6 @@ window.setRandom = function(){
   updateLibre();
 };
 
-// ── RETO 1: ver reloj → elegir opción ──
 var r1Preguntas=[];
 
 function initReto1(){
@@ -526,10 +515,7 @@ function mostrarPreguntaR1(){
   document.getElementById('prog-fill1').style.width=(r1.q*10)+'%';
   document.getElementById('feed-r1').textContent='';
   document.getElementById('feed-r1').className='feedback';
-
   setHands(document.getElementById('hand-hr1'),document.getElementById('hand-mr1'),p.h,p.m);
-
-  // Generar 4 opciones
   var correcta=timeStr(p.h,p.m);
   var opciones=[correcta];
   var intentos=0;
@@ -541,7 +527,6 @@ function mostrarPreguntaR1(){
     if(opciones.indexOf(s)===-1) opciones.push(s);
   }
   opciones=shuffle(opciones);
-
   var cont=document.getElementById('opciones-r1');
   cont.innerHTML='';
   opciones.forEach(function(op){
@@ -561,7 +546,6 @@ function mostrarPreguntaR1(){
         btn.classList.add('wrong');
         document.getElementById('feed-r1').textContent='Era '+correcta;
         document.getElementById('feed-r1').className='feedback err';
-        // Marcar correcta en verde
         cont.querySelectorAll('.opcion').forEach(function(b){
           if(b.textContent===correcta) b.classList.add('correct');
         });
@@ -578,7 +562,6 @@ function timeStr(h,m){
   return h12+':'+pad(m);
 }
 
-// ── RETO 2: ver hora digital → mover agujas ──
 var r2Preguntas=[];
 
 function initReto2(){
@@ -591,18 +574,14 @@ function mostrarPreguntaR2(){
   if(r2.q>=10){ mostrarResultado('panel-reto2',r2.aciertos,'reto2'); return; }
   var p=r2Preguntas[r2.q];
   r2.targetH=p.h; r2.targetM=p.m;
-  // Poner reloj en posición aleatoria diferente
   r2.h=(p.h+5)%12; r2.m=(p.m+25)%60;
-
   document.getElementById('prog-label2').textContent='Pregunta '+(r2.q+1)+' / 10';
   document.getElementById('prog-fill2').style.width=(r2.q*10)+'%';
   document.getElementById('feed-r2').textContent='';
   document.getElementById('feed-r2').className='feedback';
-
   var h12=p.h===0?12:p.h;
   document.getElementById('target-digital').textContent=h12+':'+pad(p.m);
   document.getElementById('target-words').textContent=toWords(p.h,p.m);
-
   setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);
   var ch12=r2.h===0?12:r2.h;
   document.getElementById('time-r2').textContent=ch12+':'+pad(r2.m);
@@ -633,7 +612,6 @@ window.comprobarReto2 = function(){
 
 function mostrarResultado(panelId, aciertos, retoId){
   var panel=document.getElementById(panelId);
-  var pct=Math.round(aciertos/10*100);
   var emoji=aciertos>=9?'🏆':aciertos>=7?'⭐':aciertos>=5?'👍':'💪';
   var msg=aciertos>=9?'¡Excelente! Eres un experto en el reloj.':
           aciertos>=7?'¡Muy bien! Casi perfecto.':
@@ -667,9 +645,6 @@ window.reiniciarReto = function(id){
     mostrarPreguntaR1();
   } else {
     r2.q=0; r2.aciertos=0;
-    mostrarPreguntaR2();
-    document.getElementById('panel-reto2').querySelector('.reto-wrap').innerHTML=
-      document.getElementById('panel-reto2').querySelector('.reto-wrap').innerHTML;
     initReto2();
   }
 };
@@ -696,7 +671,7 @@ document.getElementById('pill').style.left='4px';
 
 })();
 
-  window.switchTab = window.showTab;
+window.switchTab = window.showTab;
 </script>
 </body>
 </html>
