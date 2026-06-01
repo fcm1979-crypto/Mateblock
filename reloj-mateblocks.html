@@ -541,9 +541,9 @@ function mostrarPreguntaR1(){
         r1.aciertos++;
         document.getElementById('feed-r1').textContent='¡Correcto! ✓';
         document.getElementById('feed-r1').className='feedback ok';
-        celebrate();
+        celebrate(); window.MB.soundOk();
       } else {
-        btn.classList.add('wrong');
+        btn.classList.add('wrong'); window.MB.soundErr();
         document.getElementById('feed-r1').textContent='Era '+correcta;
         document.getElementById('feed-r1').className='feedback err';
         cont.querySelectorAll('.opcion').forEach(function(b){
@@ -594,7 +594,7 @@ window.comprobarReto2 = function(){
     document.getElementById('feed-r2').textContent='¡Perfecto! ✓';
     document.getElementById('feed-r2').className='feedback ok';
     r2.aciertos++;
-    celebrate();
+    celebrate(); window.MB.soundOk();
     r2.q++;
     setTimeout(mostrarPreguntaR2,1200);
   } else {
@@ -672,6 +672,48 @@ document.getElementById('pill').style.left='4px';
 })();
 
 window.switchTab = window.showTab;
+</script>
+
+<!-- SONIDOS MATEBLOCKS -->
+<script>
+(function(){
+  window.MB = window.MB || {};
+  var ctx = null;
+  function getCtx(){
+    if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    return ctx;
+  }
+  function playTone(freq, type, start, duration, gainVal, ac){
+    var o = ac.createOscillator();
+    var g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type = type; o.frequency.setValueAtTime(freq, start);
+    g.gain.setValueAtTime(gainVal, start);
+    g.gain.exponentialRampToValueAtTime(0.001, start + duration);
+    o.start(start); o.stop(start + duration);
+  }
+  window.MB.soundOk = function(){
+    try {
+      var ac = getCtx();
+      var t = ac.currentTime;
+      // Acorde alegre ascendente: do-mi-sol
+      playTone(523, 'sine', t,      0.18, 0.4, ac);
+      playTone(659, 'sine', t+0.1,  0.18, 0.35, ac);
+      playTone(784, 'sine', t+0.2,  0.28, 0.35, ac);
+      // Brillo encima
+      playTone(1047,'sine', t+0.22, 0.22, 0.18, ac);
+    } catch(e){}
+  };
+  window.MB.soundErr = function(){
+    try {
+      var ac = getCtx();
+      var t = ac.currentTime;
+      // Dos notas graves descendentes
+      playTone(220, 'sawtooth', t,      0.18, 0.3, ac);
+      playTone(180, 'sawtooth', t+0.15, 0.25, 0.25, ac);
+    } catch(e){}
+  };
+})();
 </script>
 </body>
 </html>

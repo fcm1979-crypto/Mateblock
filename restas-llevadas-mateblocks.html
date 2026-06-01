@@ -517,7 +517,7 @@ function pFinish() {
   var fb_el = document.getElementById('p-feedback');
   fb_el.textContent = '¡Perfecto! ' + fa + ' − ' + fb + ' = ' + (fa - fb) + ' 🎉';
   fb_el.className = 'feedback success';
-  celebrate();
+  celebrate(); window.MB.soundOk();
 }
 
 function pNew() {
@@ -620,7 +620,7 @@ function rCheck(val, btn, correct) {
     btn.style.borderColor = '#4a7048';
     fb.textContent = '¡Correcto! ' + rState.a + ' − ' + rState.b + ' = ' + correct;
     fb.className = 'feedback success';
-    celebrate();
+    celebrate(); window.MB.soundOk();
     setTimeout(rNew, 1600);
   } else {
     btn.style.background = 'linear-gradient(180deg,#f5d0cc,#e8b0aa)';
@@ -632,7 +632,7 @@ function rCheck(val, btn, correct) {
       }
     });
     fb.textContent = 'Era ' + correct + '. ' + rState.a + ' − ' + rState.b + ' = ' + correct;
-    fb.className = 'feedback wrong';
+    fb.className = 'feedback wrong'; window.MB.soundErr();
     setTimeout(rNew, 2000);
   }
 }
@@ -673,6 +673,48 @@ rNew();
     if(b) { b.style.background='linear-gradient(180deg,#c89968,#8b5a2b)'; b.style.color='#1a0a06'; b.style.borderColor='#c89968'; }
   };
   window.showRTab('learn');
+</script>
+
+<!-- SONIDOS MATEBLOCKS -->
+<script>
+(function(){
+  window.MB = window.MB || {};
+  var ctx = null;
+  function getCtx(){
+    if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    return ctx;
+  }
+  function playTone(freq, type, start, duration, gainVal, ac){
+    var o = ac.createOscillator();
+    var g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type = type; o.frequency.setValueAtTime(freq, start);
+    g.gain.setValueAtTime(gainVal, start);
+    g.gain.exponentialRampToValueAtTime(0.001, start + duration);
+    o.start(start); o.stop(start + duration);
+  }
+  window.MB.soundOk = function(){
+    try {
+      var ac = getCtx();
+      var t = ac.currentTime;
+      // Acorde alegre ascendente: do-mi-sol
+      playTone(523, 'sine', t,      0.18, 0.4, ac);
+      playTone(659, 'sine', t+0.1,  0.18, 0.35, ac);
+      playTone(784, 'sine', t+0.2,  0.28, 0.35, ac);
+      // Brillo encima
+      playTone(1047,'sine', t+0.22, 0.22, 0.18, ac);
+    } catch(e){}
+  };
+  window.MB.soundErr = function(){
+    try {
+      var ac = getCtx();
+      var t = ac.currentTime;
+      // Dos notas graves descendentes
+      playTone(220, 'sawtooth', t,      0.18, 0.3, ac);
+      playTone(180, 'sawtooth', t+0.15, 0.25, 0.25, ac);
+    } catch(e){}
+  };
+})();
 </script>
 </body>
 </html>
