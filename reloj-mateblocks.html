@@ -29,7 +29,7 @@ body{font-family:'DM Sans',sans-serif;
 .panel{display:none;width:100%;max-width:400px;flex-direction:column;align-items:center;}
 .panel.show{display:flex;}
 
-/* Toggle números/romanos */
+/* Toggle números/romanos/24h */
 .toggle{display:flex;background:rgba(0,0,0,.35);border:1px solid rgba(184,137,63,.3);
   border-radius:999px;padding:4px;margin-bottom:14px;position:relative;}
 .toggle button{border:0;background:transparent;padding:8px 24px;
@@ -40,6 +40,12 @@ body{font-family:'DM Sans',sans-serif;
   background:linear-gradient(180deg,#e8c989,#b8893f 70%,#8c6228);
   border-radius:999px;transition:left .3s cubic-bezier(.5,0,.2,1);
   box-shadow:0 2px 6px rgba(0,0,0,.5);}
+.toggle.dual{padding:4px;}
+.toggle.dual .pill{width:calc(33.333% - 4px);}
+
+/* Indicador formato hora */
+.format-indicator{text-align:center;font-size:11px;color:#c89968;margin-bottom:6px;
+  font-weight:700;letter-spacing:.05em;}
 
 /* RELOJ SVG — FIX: margin:0 auto centra en todos los paneles */
 .clock-wrap{width:min(280px,82vw);height:min(280px,82vw);margin:0 auto 14px;
@@ -49,6 +55,8 @@ body{font-family:'DM Sans',sans-serif;
 .digital{text-align:center;margin-bottom:10px;}
 .time{font-family:'Fraunces',serif;font-size:46px;font-weight:800;
   color:#ede0c4;line-height:1;}
+.time-24h{font-family:'DM Sans',sans-serif;font-size:13px;color:#c89968;
+  margin-top:4px;font-weight:700;}
 .words{font-family:'Cormorant Garamond',serif;font-style:italic;
   font-size:18px;color:#c89968;margin-top:2px;}
 
@@ -87,8 +95,12 @@ body{font-family:'DM Sans',sans-serif;
 /* Reto modo 2: mover agujas */
 .reto-digital{font-family:'Fraunces',serif;font-size:38px;font-weight:800;
   color:#ede0c4;text-align:center;margin-bottom:6px;}
+.reto-digital-24h{font-family:'DM Sans',sans-serif;font-size:12px;color:#c89968;
+  text-align:center;margin-bottom:6px;font-weight:700;}
 .reto-words{font-family:'Cormorant Garamond',serif;font-style:italic;
   font-size:17px;color:#c89968;text-align:center;margin-bottom:12px;}
+.reto-context{font-size:11px;color:#a8a199;text-align:center;margin-bottom:8px;
+  font-style:italic;}
 .reto-instruccion{font-size:12px;color:rgba(237,224,196,.6);text-align:center;
   margin-bottom:10px;}
 .btn-comprobar{width:100%;border:0;padding:14px;border-radius:14px;
@@ -153,6 +165,12 @@ header{display:flex;align-items:center;justify-content:space-between;width:100%;
     <button class="active" id="btn-num" onclick="setMode('num')">Números</button>
     <button id="btn-rom" onclick="setMode('rom')">Romanos</button>
   </div>
+  <div class="toggle dual">
+    <div class="pill" id="pill24" style="width:calc(50% - 4px);left:4px;"></div>
+    <button class="active" id="btn-12h" onclick="setFormat('12h')">12 horas</button>
+    <button id="btn-24h" onclick="setFormat('24h')">24 horas</button>
+  </div>
+  <div class="format-indicator" id="format-ind"></div>
   <div class="clock-wrap" id="clock-libre">
     <svg id="svg-libre" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;">
       <defs>
@@ -170,6 +188,7 @@ header{display:flex;align-items:center;justify-content:space-between;width:100%;
       <ellipse cx="75" cy="55" rx="26" ry="13" fill="rgba(255,255,255,0.28)" transform="rotate(-25 75 55)"/>
       <g id="ticks-l"></g>
       <g id="nums-l"></g>
+      <g id="nums-24-l"></g>
       <line id="hand-hl" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="6" stroke-linecap="round" transform="rotate(90 100 100)"/>
       <line id="hand-ml" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="3.5" stroke-linecap="round" transform="rotate(0 100 100)"/>
       <circle cx="100" cy="100" r="6" fill="#b8893f"/>
@@ -178,6 +197,7 @@ header{display:flex;align-items:center;justify-content:space-between;width:100%;
   </div>
   <div class="digital">
     <div class="time" id="time-l">3:00</div>
+    <div class="time-24h" id="time-24h-l" style="display:none;">15:00 (Tarde)</div>
     <div class="words" id="words-l">Las tres en punto</div>
   </div>
   <div class="feedback" id="feed-l">Arrastra las manecillas</div>
@@ -209,6 +229,7 @@ header{display:flex;align-items:center;justify-content:space-between;width:100%;
         <circle cx="100" cy="100" r="88" fill="url(#fg2)"/>
         <g id="ticks-r1"></g>
         <g id="nums-r1"></g>
+        <g id="nums-24-r1" style="display:none;"></g>
         <line id="hand-hr1" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="7" stroke-linecap="round" transform="rotate(90 100 100)"/>
         <line id="hand-mr1" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="4" stroke-linecap="round" transform="rotate(0 100 100)"/>
         <circle cx="100" cy="100" r="7" fill="#b8893f"/>
@@ -226,6 +247,8 @@ header{display:flex;align-items:center;justify-content:space-between;width:100%;
     <div class="progress-label" id="prog-label2">Pregunta 1 / 10</div>
     <div class="progress-bar"><div class="progress-fill" id="prog-fill2" style="width:0%"></div></div>
     <div class="reto-digital" id="target-digital">3:00</div>
+    <div class="reto-digital-24h" id="target-digital-24h">(15:00)</div>
+    <div class="reto-context" id="reto-context"></div>
     <div class="reto-words" id="target-words">Las tres en punto</div>
     <div class="reto-instruccion">Mueve las manecillas del reloj para marcar esa hora</div>
     <div class="clock-wrap" id="clock-r2">
@@ -244,6 +267,7 @@ header{display:flex;align-items:center;justify-content:space-between;width:100%;
         <circle cx="100" cy="100" r="88" fill="url(#fg3)"/>
         <g id="ticks-r2"></g>
         <g id="nums-r2"></g>
+        <g id="nums-24-r2" style="display:none;"></g>
         <line id="hand-hr2" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="6" stroke-linecap="round" transform="rotate(90 100 100)"/>
         <line id="hand-mr2" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="3.5" stroke-linecap="round" transform="rotate(0 100 100)"/>
         <circle cx="100" cy="100" r="6" fill="#b8893f"/>
@@ -252,6 +276,7 @@ header{display:flex;align-items:center;justify-content:space-between;width:100%;
     </div>
     <div class="digital" style="margin-bottom:10px;">
       <div class="time" id="time-r2">3:00</div>
+      <div class="time-24h" id="time-24h-r2"></div>
     </div>
     <button class="btn-comprobar" onclick="comprobarReto2()">✓ Comprobar</button>
     <div class="feedback" id="feed-r2"></div>
@@ -262,11 +287,11 @@ header{display:flex;align-items:center;justify-content:space-between;width:100%;
 <div class="panel" id="panel-info">
   <div class="info-panel">
     <h3>⏰ Cómo funciona El Reloj</h3>
-    <p><strong>Modo Libre:</strong> Arrastra las manecillas del reloj para explorar las horas. La manecilla <strong>negra corta</strong> marca las horas y la <strong>roja larga</strong> los minutos.</p>
-    <div class="tip">💡 Cada número del reloj vale 5 minutos. Si la manecilla larga apunta al 3, son 15 minutos.</div>
-    <p><strong>Reto Leer:</strong> El reloj muestra una hora. Elige la opción correcta entre las 4 respuestas. Son 10 preguntas y verás tu puntuación al final.</p>
-    <p><strong>Reto Poner:</strong> Se muestra una hora en digital. Debes mover las manecillas del reloj analógico hasta marcar esa hora exacta y pulsar Comprobar.</p>
-    <div class="tip">⭐ Cambia entre números arábigos y romanos con el selector de arriba.</div>
+    <p><strong>Modo Libre:</strong> Arrastra las manecillas del reloj para explorar las horas en formato 12h o 24h. La manecilla <strong>negra corta</strong> marca las horas y la <strong>roja larga</strong> los minutos.</p>
+    <div class="tip">💡 En modo 24h ves los números 13-24 alrededor. Mañana: 🔵 Azul, Tarde: 🟠 Naranja, Noche: 🟣 Púrpura.</div>
+    <p><strong>Reto Leer:</strong> El reloj muestra una hora. Elige la opción correcta entre las 4 respuestas (en 12h y 24h). Son 10 preguntas con puntuación final.</p>
+    <p><strong>Reto Poner:</strong> Se muestra una hora en ambos formatos (ej: 3:00 PM = 15:00). Mueve las manecillas del reloj analógico y pulsa Comprobar. Incluye un contexto real (desayuno, recreo, comida...).</p>
+    <div class="tip">⭐ Aprende cuándo es cada hora del día: Desayuno (7-8h), Clase (9-13h), Comida (14h), Recreo (16h), Cena (20-21h).</div>
   </div>
 </div>
 
@@ -277,9 +302,20 @@ var NOMBRES = ['doce','una','dos','tres','cuatro','cinco','seis','siete','ocho',
 var ROMAN   = ['XII','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
 var ARABIC  = ['12','1','2','3','4','5','6','7','8','9','10','11'];
 
-var libre = { h:3, m:0, mode:'num', dragging:null };
-var r1 = { q:0, aciertos:0, respondida:false };
-var r2 = { q:0, aciertos:0, h:0, m:0, targetH:0, targetM:0, dragging:null };
+var CONTEXTOS = [
+  {h:7,m:0,ctx:'Desayuno 🥣'},
+  {h:9,m:0,ctx:'Clase comienza 📚'},
+  {h:11,m:30,ctx:'Recreo 🎮'},
+  {h:14,m:0,ctx:'Comida 🍽️'},
+  {h:16,m:0,ctx:'Merienda 🍎'},
+  {h:18,m:30,ctx:'Deporte ⚽'},
+  {h:20,m:0,ctx:'Cena 🍜'},
+  {h:21,m:0,ctx:'Dormir 😴'}
+];
+
+var libre = { h:3, m:0, mode:'num', format:'12h', dragging:null };
+var r1 = { q:0, aciertos:0, respondida:false, format:'12h' };
+var r2 = { q:0, aciertos:0, h:0, m:0, targetH:0, targetM:0, dragging:null, format:'24h' };
 
 var PREGUNTAS = [
   {h:3,m:0},{h:6,m:30},{h:9,m:15},{h:12,m:0},
@@ -298,6 +334,16 @@ function shuffle(arr){
 }
 
 function pad(n){ return n<10?'0'+n:''+n; }
+
+function to24h(h12){
+  return h12===0?0:h12;
+}
+
+function getPeriod(h24){
+  if(h24>=6&&h24<12) return {name:'Mañana',icon:'🔵',color:'#3498db'};
+  if(h24>=12&&h24<18) return {name:'Tarde',icon:'🟠',color:'#e67e22'};
+  return {name:'Noche',icon:'🟣',color:'#9b59b6'};
+}
 
 function toWords(h,m){
   var n=NOMBRES[h%12];
@@ -341,6 +387,20 @@ function buildNums(g, mode){
   g.innerHTML=html;
 }
 
+function buildNums24h(g){
+  var html='';
+  for(var i=0;i<12;i++){
+    var h24=i===0?0:(12+i);
+    var p=getPeriod(h24);
+    var angle=(i*30-90)*Math.PI/180;
+    var r=48;
+    var x=100+r*Math.cos(angle), y=100+r*Math.sin(angle);
+    var txt=h24<10?'0'+h24:''+h24;
+    html+='<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" font-weight="700" fill="'+p.color+'">'+txt+'</text>';
+  }
+  g.innerHTML=html;
+}
+
 function setHands(hEl, mEl, h, m){
   var hDeg=h*30+m*0.5, mDeg=m*6;
   hEl.setAttribute('transform','rotate('+hDeg+' 100 100)');
@@ -353,12 +413,29 @@ buildTicks(document.getElementById('ticks-r2'));
 buildNums(document.getElementById('nums-l'),'num');
 buildNums(document.getElementById('nums-r1'),'num');
 buildNums(document.getElementById('nums-r2'),'num');
+buildNums24h(document.getElementById('nums-24-l'));
+buildNums24h(document.getElementById('nums-24-r1'));
+buildNums24h(document.getElementById('nums-24-r2'));
 
 function updateLibre(){
   setHands(document.getElementById('hand-hl'), document.getElementById('hand-ml'), libre.h, libre.m);
   var h12=libre.h===0?12:libre.h;
   document.getElementById('time-l').textContent=h12+':'+pad(libre.m);
   document.getElementById('words-l').textContent=toWords(libre.h,libre.m);
+  
+  if(libre.format==='24h'){
+    var h24=libre.h===0?0:(libre.h+12);
+    var p=getPeriod(h24);
+    document.getElementById('time-24h-l').textContent=pad(h24)+':'+pad(libre.m)+' ('+p.name+')';
+    document.getElementById('nums-24-l').style.display='';
+    document.getElementById('nums-l').style.display='none';
+    document.getElementById('format-ind').textContent=p.icon+' '+p.name;
+  } else {
+    document.getElementById('time-24h-l').style.display='none';
+    document.getElementById('nums-24-l').style.display='none';
+    document.getElementById('nums-l').style.display='';
+    document.getElementById('format-ind').textContent='';
+  }
 }
 updateLibre();
 
@@ -450,6 +527,8 @@ document.addEventListener('mousemove',function(e){
   setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);
   var h12=r2.h===0?12:r2.h;
   document.getElementById('time-r2').textContent=h12+':'+pad(r2.m);
+  var h24=r2.h===0?0:(r2.h+12);
+  document.getElementById('time-24h-r2').textContent=pad(h24)+':'+pad(r2.m)+' ('+getPeriod(h24).name+')';
 });
 document.addEventListener('touchmove',function(e){
   if(!r2.dragging) return;
@@ -464,6 +543,8 @@ document.addEventListener('touchmove',function(e){
   setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);
   var h12=r2.h===0?12:r2.h;
   document.getElementById('time-r2').textContent=h12+':'+pad(r2.m);
+  var h24=r2.h===0?0:(r2.h+12);
+  document.getElementById('time-24h-r2').textContent=pad(h24)+':'+pad(r2.m)+' ('+getPeriod(h24).name+')';
 },{passive:false});
 document.addEventListener('mouseup',function(){ r2.dragging=null; });
 document.addEventListener('touchend',function(){ r2.dragging=null; });
@@ -487,6 +568,14 @@ window.setMode = function(m){
   buildNums(document.getElementById('nums-l'),m);
 };
 
+window.setFormat = function(fmt){
+  libre.format=fmt;
+  document.getElementById('btn-12h').classList.toggle('active',fmt==='12h');
+  document.getElementById('btn-24h').classList.toggle('active',fmt==='24h');
+  document.getElementById('pill24').style.left=fmt==='24h'?'calc(50%)':'4px';
+  updateLibre();
+};
+
 window.setNow = function(){
   var now=new Date();
   libre.h=now.getHours()%12; libre.m=now.getMinutes();
@@ -504,6 +593,7 @@ var r1Preguntas=[];
 function initReto1(){
   r1Preguntas=shuffle(PREGUNTAS).slice(0,10);
   r1.q=0; r1.aciertos=0;
+  r1.format=Math.random()>0.5?'12h':'24h';
   mostrarPreguntaR1();
 }
 
@@ -516,14 +606,15 @@ function mostrarPreguntaR1(){
   document.getElementById('feed-r1').textContent='';
   document.getElementById('feed-r1').className='feedback';
   setHands(document.getElementById('hand-hr1'),document.getElementById('hand-mr1'),p.h,p.m);
-  var correcta=timeStr(p.h,p.m);
+  
+  var correcta=r1.format==='24h'?timeStr24h(p.h,p.m):timeStr(p.h,p.m);
   var opciones=[correcta];
   var intentos=0;
   while(opciones.length<4 && intentos<50){
     intentos++;
     var rh=Math.floor(Math.random()*12);
     var rm=[0,5,10,15,20,25,30,35,40,45,50,55][Math.floor(Math.random()*12)];
-    var s=timeStr(rh,rm);
+    var s=r1.format==='24h'?timeStr24h(rh,rm):timeStr(rh,rm);
     if(opciones.indexOf(s)===-1) opciones.push(s);
   }
   opciones=shuffle(opciones);
@@ -541,9 +632,9 @@ function mostrarPreguntaR1(){
         r1.aciertos++;
         document.getElementById('feed-r1').textContent='¡Correcto! ✓';
         document.getElementById('feed-r1').className='feedback ok';
-        celebrate();
+        celebrate(); window.MB.soundOk();
       } else {
-        btn.classList.add('wrong');
+        btn.classList.add('wrong'); window.MB.soundErr();
         document.getElementById('feed-r1').textContent='Era '+correcta;
         document.getElementById('feed-r1').className='feedback err';
         cont.querySelectorAll('.opcion').forEach(function(b){
@@ -562,10 +653,15 @@ function timeStr(h,m){
   return h12+':'+pad(m);
 }
 
+function timeStr24h(h,m){
+  var h24=h===0?0:(h+12);
+  return pad(h24)+':'+pad(m);
+}
+
 var r2Preguntas=[];
 
 function initReto2(){
-  r2Preguntas=shuffle(PREGUNTAS).slice(0,10);
+  r2Preguntas=shuffle(CONTEXTOS).slice(0,10);
   r2.q=0; r2.aciertos=0;
   mostrarPreguntaR2();
 }
@@ -579,12 +675,18 @@ function mostrarPreguntaR2(){
   document.getElementById('prog-fill2').style.width=(r2.q*10)+'%';
   document.getElementById('feed-r2').textContent='';
   document.getElementById('feed-r2').className='feedback';
+  
   var h12=p.h===0?12:p.h;
-  document.getElementById('target-digital').textContent=h12+':'+pad(p.m);
+  var h24=p.h===0?0:p.h;
+  document.getElementById('target-digital').textContent=h12+':'+pad(p.m)+' AM';
+  document.getElementById('target-digital-24h').textContent='('+pad(h24)+':'+pad(p.m)+')';
+  document.getElementById('reto-context').textContent=p.ctx;
   document.getElementById('target-words').textContent=toWords(p.h,p.m);
   setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);
   var ch12=r2.h===0?12:r2.h;
+  var ch24=r2.h===0?0:(r2.h+12);
   document.getElementById('time-r2').textContent=ch12+':'+pad(r2.m);
+  document.getElementById('time-24h-r2').textContent=pad(ch24)+':'+pad(r2.m);
 }
 
 window.comprobarReto2 = function(){
@@ -594,7 +696,7 @@ window.comprobarReto2 = function(){
     document.getElementById('feed-r2').textContent='¡Perfecto! ✓';
     document.getElementById('feed-r2').className='feedback ok';
     r2.aciertos++;
-    celebrate();
+    celebrate(); window.MB.soundOk();
     r2.q++;
     setTimeout(mostrarPreguntaR2,1200);
   } else {
@@ -635,12 +737,13 @@ window.reiniciarReto = function(id){
       '<div class="progress-label" id="prog-label1">Pregunta 1 / 10</div>'+
       '<div class="progress-bar"><div class="progress-fill" id="prog-fill1" style="width:0%"></div></div>'+
       '<div class="reto-question">¿Qué hora marca el reloj?</div>'+
-      '<div class="reto-clock" id="clock-r1"><svg id="svg-r1" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;"><defs><radialGradient id="wg2b" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#c4922a"/><stop offset="100%" stop-color="#5c3a08"/></radialGradient><radialGradient id="fg2b" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#fdf5e0"/><stop offset="100%" stop-color="#d9c8a4"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#wg2b)"/><circle cx="100" cy="100" r="88" fill="url(#fg2b)"/><g id="ticks-r1"></g><g id="nums-r1"></g><line id="hand-hr1" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="7" stroke-linecap="round" transform="rotate(90 100 100)"/><line id="hand-mr1" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="4" stroke-linecap="round" transform="rotate(0 100 100)"/><circle cx="100" cy="100" r="7" fill="#b8893f"/><circle cx="100" cy="100" r="3.5" fill="#cc2200"/></svg></div>'+
+      '<div class="reto-clock" id="clock-r1"><svg id="svg-r1" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;"><defs><radialGradient id="wg2b" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#c4922a"/><stop offset="100%" stop-color="#5c3a08"/></radialGradient><radialGradient id="fg2b" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#fdf5e0"/><stop offset="100%" stop-color="#d9c8a4"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#wg2b)"/><circle cx="100" cy="100" r="88" fill="url(#fg2b)"/><g id="ticks-r1"></g><g id="nums-r1"></g><g id="nums-24-r1" style="display:none;"></g><line id="hand-hr1" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="7" stroke-linecap="round" transform="rotate(90 100 100)"/><line id="hand-mr1" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="4" stroke-linecap="round" transform="rotate(0 100 100)"/><circle cx="100" cy="100" r="7" fill="#b8893f"/><circle cx="100" cy="100" r="3.5" fill="#cc2200"/></svg></div>'+
       '<div class="opciones" id="opciones-r1"></div>'+
       '<div class="feedback" id="feed-r1"></div>'+
       '</div>';
     buildTicks(document.getElementById('ticks-r1'));
     buildNums(document.getElementById('nums-r1'),'num');
+    buildNums24h(document.getElementById('nums-24-r1'));
     r1.q=0; r1.aciertos=0;
     mostrarPreguntaR1();
   } else {
@@ -668,10 +771,51 @@ function celebrate(){
 }
 
 document.getElementById('pill').style.left='4px';
+document.getElementById('pill24').style.left='4px';
 
 })();
 
 window.switchTab = window.showTab;
 </script>
+
+<!-- SONIDOS MATEBLOCKS -->
+<script>
+(function(){
+  window.MB = window.MB || {};
+  var ctx = null;
+  function getCtx(){
+    if(!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    return ctx;
+  }
+  function playTone(freq, type, start, duration, gainVal, ac){
+    var o = ac.createOscillator();
+    var g = ac.createGain();
+    o.connect(g); g.connect(ac.destination);
+    o.type = type; o.frequency.setValueAtTime(freq, start);
+    g.gain.setValueAtTime(gainVal, start);
+    g.gain.exponentialRampToValueAtTime(0.001, start + duration);
+    o.start(start); o.stop(start + duration);
+  }
+  window.MB.soundOk = function(){
+    try {
+      var ac = getCtx();
+      var t = ac.currentTime;
+      playTone(523, 'sine', t,      0.18, 0.03, ac);
+      playTone(659, 'sine', t+0.1,  0.18, 0.03, ac);
+      playTone(784, 'sine', t+0.2,  0.28, 0.03, ac);
+      playTone(1047,'sine', t+0.22, 0.22, 0.02, ac);
+    } catch(e){}
+  };
+  window.MB.soundErr = function(){
+    try {
+      var ac = getCtx();
+      var t = ac.currentTime;
+      playTone(220, 'sawtooth', t,      0.18, 0.02, ac);
+      playTone(180, 'sawtooth', t+0.15, 0.25, 0.02, ac);
+    } catch(e){}
+  };
+})();
+</script>
+
 </body>
 </html>
