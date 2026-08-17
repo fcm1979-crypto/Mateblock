@@ -7,13 +7,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Fraunces:opsz,wght@9..144,700;9..144,800&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;overflow-x:hidden;touch-action:manipulation;}
-body{font-family:'DM Sans',sans-serif;
+html,body{--st:max(0px,env(safe-area-inset-top));--sb:max(0px,env(safe-area-inset-bottom));height:100%;overflow-x:hidden;touch-action:manipulation;}
+body{--st:max(0px,env(safe-area-inset-top));--sb:max(0px,env(safe-area-inset-bottom));--st:max(0px,env(safe-area-inset-top));--sb:max(0px,env(safe-area-inset-bottom));font-family:'DM Sans',sans-serif;
   background:radial-gradient(ellipse at 30% 0%,#6b4226,transparent 60%),
   radial-gradient(ellipse at 70% 100%,#2a1810,transparent 50%),
   linear-gradient(135deg,#4a2c14,#2a1808 60%,#150a04);
   color:#ede0c4;min-height:100%;display:flex;flex-direction:column;align-items:center;
-  padding:8px 12px 32px;}
+  padding:calc(var(--st)+8px) 12px calc(32px + var(--sb));}
 
 /* TABS */
 .tabs{display:flex;gap:6px;margin-bottom:14px;width:100%;max-width:400px;}
