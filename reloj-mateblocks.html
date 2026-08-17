@@ -1,677 +1,86 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/>
-<title>El Reloj</title>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"/><title>El Reloj</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Fraunces:opsz,wght@9..144,700;9..144,800&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-html,body{--st:max(0px,env(safe-area-inset-top));--sb:max(0px,env(safe-area-inset-bottom));height:100%;overflow-x:hidden;touch-action:manipulation;}
-body{--st:max(0px,env(safe-area-inset-top));--sb:max(0px,env(safe-area-inset-bottom));--st:max(0px,env(safe-area-inset-top));--sb:max(0px,env(safe-area-inset-bottom));font-family:'DM Sans',sans-serif;
-  background:radial-gradient(ellipse at 30% 0%,#6b4226,transparent 60%),
-  radial-gradient(ellipse at 70% 100%,#2a1810,transparent 50%),
-  linear-gradient(135deg,#4a2c14,#2a1808 60%,#150a04);
-  color:#ede0c4;min-height:100%;display:flex;flex-direction:column;align-items:center;
-  padding:calc(var(--st)+8px) 12px calc(32px + var(--sb));}
-
-/* TABS */
-.tabs{display:flex;gap:6px;margin-bottom:14px;width:100%;max-width:400px;}
-.tab{flex:1;border:0;padding:10px 6px;border-radius:12px;font-family:'DM Sans',sans-serif;
-  font-size:12px;font-weight:700;cursor:pointer;
-  background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);
-  border:1.5px solid rgba(255,255,255,.1);}
-.tab.active{background:linear-gradient(180deg,#c89968,#8b5a2b);color:#1a0a06;
-  border-color:#c89968;}
-.tab:active{transform:scale(.96);}
-
-/* PANEL */
-.panel{display:none;width:100%;max-width:400px;flex-direction:column;align-items:center;}
-.panel.show{display:flex;}
-
-/* Toggle números/romanos */
-.toggle{display:flex;background:rgba(0,0,0,.35);border:1px solid rgba(184,137,63,.3);
-  border-radius:999px;padding:4px;margin-bottom:14px;position:relative;}
-.toggle button{border:0;background:transparent;padding:8px 24px;
-  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;
-  color:#c89968;cursor:pointer;border-radius:999px;position:relative;z-index:2;}
-.toggle button.active{color:#1a0a06;}
-.pill{position:absolute;top:4px;bottom:4px;width:calc(50% - 4px);left:4px;
-  background:linear-gradient(180deg,#e8c989,#b8893f 70%,#8c6228);
-  border-radius:999px;transition:left .3s cubic-bezier(.5,0,.2,1);
-  box-shadow:0 2px 6px rgba(0,0,0,.5);}
-
-/* RELOJ SVG — FIX: margin:0 auto centra en todos los paneles */
-.clock-wrap{width:min(280px,82vw);height:min(280px,82vw);margin:0 auto 14px;
-  cursor:grab;touch-action:none;user-select:none;}
-
-/* Display digital */
-.digital{text-align:center;margin-bottom:10px;}
-.time{font-family:'Fraunces',serif;font-size:46px;font-weight:800;
-  color:#ede0c4;line-height:1;}
-.words{font-family:'Cormorant Garamond',serif;font-style:italic;
-  font-size:18px;color:#c89968;margin-top:2px;}
-
-/* Botones libre */
-.btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
-.btn{border:0;padding:11px 16px;border-radius:13px;font-family:'DM Sans',sans-serif;
-  font-size:12px;font-weight:700;cursor:pointer;}
-.btn:active{transform:translateY(1px);}
-.btn-r{background:linear-gradient(180deg,#d94a2c,#a02818 70%,#6b1a0c);
-  color:#fff5e6;box-shadow:0 3px 0 #4a1308;}
-.btn-s{background:linear-gradient(180deg,#c89968,#8b5a2b 70%,#4a2810);
-  color:#fdf2dc;box-shadow:0 2px 0 #2a1808;}
-
-/* RETO — FIX: flex+align-items centra todos los hijos incluido el reloj */
-.reto-wrap{width:100%;display:flex;flex-direction:column;align-items:center;}
-.progress-bar{background:rgba(255,255,255,.1);border-radius:99px;height:8px;
-  margin-bottom:14px;overflow:hidden;width:100%;}
-.progress-fill{height:100%;background:linear-gradient(90deg,#c89968,#d94a2c);
-  border-radius:99px;transition:width .4s;}
-.progress-label{font-size:11px;color:rgba(237,224,196,.6);text-align:center;
-  margin-bottom:10px;font-weight:700;letter-spacing:.05em;}
-
-/* Reto modo 1: opción múltiple */
-.reto-clock{width:min(220px,70vw);height:min(220px,70vw);margin:0 auto 12px;}
-.reto-question{font-family:'Fraunces',serif;font-size:18px;text-align:center;
-  color:#ede0c4;margin-bottom:14px;line-height:1.3;}
-.opciones{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:12px;}
-.opcion{border:0;padding:14px 10px;border-radius:14px;font-family:'Fraunces',serif;
-  font-size:20px;font-weight:700;cursor:pointer;
-  background:linear-gradient(180deg,rgba(237,224,196,.97),rgba(217,200,164,.97));
-  color:#1a0a06;box-shadow:0 4px 0 rgba(0,0,0,.3);}
-.opcion:active{transform:translateY(2px);}
-.opcion.correct{background:linear-gradient(180deg,#6bcb77,#4a8a50);color:white;}
-.opcion.wrong{background:linear-gradient(180deg,#e85555,#a02020);color:white;}
-
-/* Reto modo 2: mover agujas */
-.reto-digital{font-family:'Fraunces',serif;font-size:38px;font-weight:800;
-  color:#ede0c4;text-align:center;margin-bottom:6px;}
-.reto-words{font-family:'Cormorant Garamond',serif;font-style:italic;
-  font-size:17px;color:#c89968;text-align:center;margin-bottom:12px;}
-.reto-instruccion{font-size:12px;color:rgba(237,224,196,.6);text-align:center;
-  margin-bottom:10px;}
-.btn-comprobar{width:100%;border:0;padding:14px;border-radius:14px;
-  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;
-  background:linear-gradient(180deg,#d94a2c,#a02818);color:#fff5e6;
-  box-shadow:0 3px 0 #4a1308;margin-bottom:10px;}
-
-/* Feedback */
-.feedback{text-align:center;font-size:15px;min-height:22px;
-  color:#8b5a2b;margin-bottom:10px;font-weight:700;}
-.feedback.ok{color:#4a7048;}
-.feedback.err{color:#a02818;}
-
-/* Pantalla final */
-.resultado-final{text-align:center;padding:20px 10px;}
-.resultado-emoji{font-size:64px;margin-bottom:10px;}
-.resultado-titulo{font-family:'Fraunces',serif;font-size:28px;font-weight:800;
-  color:#ede0c4;margin-bottom:6px;}
-.resultado-score{font-family:'Fraunces',serif;font-size:48px;font-weight:800;
-  color:#c89968;margin-bottom:16px;}
-.resultado-msg{font-size:14px;color:rgba(237,224,196,.7);margin-bottom:20px;
-  line-height:1.5;}
-
-/* Info panel */
-.info-panel{background:linear-gradient(180deg,rgba(237,224,196,.97),rgba(217,200,164,.97));
-  border-radius:18px;padding:16px;color:#1a0a06;width:100%;}
-.info-panel h3{font-family:'Fraunces',serif;font-size:18px;font-weight:800;
-  margin-bottom:10px;color:#4a2c14;}
-.info-panel p{font-size:13px;line-height:1.6;margin-bottom:8px;}
-.info-panel .tip{background:rgba(200,153,104,.2);border-left:3px solid #c89968;
-  padding:8px 10px;border-radius:0 8px 8px 0;font-size:12px;margin-bottom:6px;}
-
-@keyframes float-up{0%{transform:translateY(0) rotate(0);opacity:1;}
-  100%{transform:translateY(-100vh) rotate(720deg);opacity:0;}}
-.confetti{position:fixed;width:12px;height:12px;pointer-events:none;
-  z-index:999;animation:float-up 2.5s ease-out forwards;}
-
-header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:480px;margin-bottom:10px;z-index:1;}
-.logo{font-family:'Fraunces',serif;font-size:22px;font-weight:800;color:#ede0c4;letter-spacing:-0.5px;}
-.logo span{color:#d94a2c;}
-.module-name{font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:#c89968;font-weight:500;opacity:0.85;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}html,body{height:100%;overflow-x:hidden;touch-action:manipulation;}body{font-family:'DM Sans',sans-serif;background:radial-gradient(ellipse at 30% 0%,#6b4226,transparent 60%),radial-gradient(ellipse at 70% 100%,#2a1810,transparent 50%),linear-gradient(135deg,#4a2c14,#2a1808 60%,#150a04);color:#ede0c4;min-height:100%;display:flex;flex-direction:column;align-items:center;padding:calc(var(--st)+8px) 12px calc(32px + var(--sb));}.tabs{display:flex;gap:6px;margin-bottom:14px;width:100%;max-width:400px;}.tab{flex:1;border:0;padding:10px 6px;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:rgba(255,255,255,.1);color:rgba(237,224,196,.6);border:1.5px solid rgba(255,255,255,.1);}.tab.active{background:linear-gradient(180deg,#c89968,#8b5a2b);color:#1a0a06;border-color:#c89968;}.tab:active{transform:scale(.96);}.panel{display:none;width:100%;max-width:400px;flex-direction:column;align-items:center;}.panel.show{display:flex;}.toggle{display:flex;background:rgba(0,0,0,.35);border:1px solid rgba(184,137,63,.3);border-radius:999px;padding:4px;margin-bottom:14px;position:relative;}.toggle button{border:0;background:transparent;padding:8px 24px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:#c89968;cursor:pointer;border-radius:999px;position:relative;z-index:2;}.toggle button.active{color:#1a0a06;}.pill{position:absolute;top:4px;bottom:4px;width:calc(50% - 4px);left:4px;background:linear-gradient(180deg,#e8c989,#b8893f 70%,#8c6228);border-radius:999px;transition:left .3s cubic-bezier(.5,0,.2,1);box-shadow:0 2px 6px rgba(0,0,0,.5);}.format-indicator{text-align:center;font-size:11px;color:#c89968;margin-bottom:6px;font-weight:700;}.clock-wrap{width:min(280px,82vw);height:min(280px,82vw);margin:0 auto 14px;cursor:grab;touch-action:none;user-select:none;}.digital{text-align:center;margin-bottom:10px;}.time{font-family:'Fraunces',serif;font-size:46px;font-weight:800;color:#ede0c4;line-height:1;}.time-24h{font-family:'DM Sans',sans-serif;font-size:13px;color:#c89968;margin-top:4px;font-weight:700;}.words{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:#c89968;margin-top:2px;}.btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}.btn{border:0;padding:11px 16px;border-radius:13px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}.btn:active{transform:translateY(1px);}.btn-r{background:linear-gradient(180deg,#d94a2c,#a02818 70%,#6b1a0c);color:#fff5e6;box-shadow:0 3px 0 #4a1308;}.btn-s{background:linear-gradient(180deg,#c89968,#8b5a2b 70%,#4a2810);color:#fdf2dc;box-shadow:0 2px 0 #2a1808;}.reto-wrap{width:100%;display:flex;flex-direction:column;align-items:center;}.progress-bar{background:rgba(255,255,255,.1);border-radius:99px;height:8px;margin-bottom:14px;overflow:hidden;width:100%;}.progress-fill{height:100%;background:linear-gradient(90deg,#c89968,#d94a2c);border-radius:99px;transition:width .4s;}.progress-label{font-size:11px;color:rgba(237,224,196,.6);text-align:center;margin-bottom:10px;font-weight:700;}.reto-clock{width:min(220px,70vw);height:min(220px,70vw);margin:0 auto 12px;}.reto-question{font-family:'Fraunces',serif;font-size:18px;text-align:center;color:#ede0c4;margin-bottom:14px;line-height:1.3;}.opciones{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;margin-bottom:12px;}.opcion{border:0;padding:14px 10px;border-radius:14px;font-family:'Fraunces',serif;font-size:20px;font-weight:700;cursor:pointer;background:linear-gradient(180deg,rgba(237,224,196,.97),rgba(217,200,164,.97));color:#1a0a06;box-shadow:0 4px 0 rgba(0,0,0,.3);}.opcion:active{transform:translateY(2px);}.opcion.correct{background:linear-gradient(180deg,#6bcb77,#4a8a50);color:white;}.opcion.wrong{background:linear-gradient(180deg,#e85555,#a02020);color:white;}.reto-digital{font-family:'Fraunces',serif;font-size:38px;font-weight:800;color:#ede0c4;text-align:center;margin-bottom:6px;}.reto-digital-24h{font-family:'DM Sans',sans-serif;font-size:12px;color:#c89968;text-align:center;margin-bottom:6px;font-weight:700;}.reto-words{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:17px;color:#c89968;text-align:center;margin-bottom:12px;}.reto-context{font-size:11px;color:#a8a199;text-align:center;margin-bottom:8px;font-style:italic;}.reto-instruccion{font-size:12px;color:rgba(237,224,196,.6);text-align:center;margin-bottom:10px;}.btn-comprobar{width:100%;border:0;padding:14px;border-radius:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;background:linear-gradient(180deg,#d94a2c,#a02818);color:#fff5e6;box-shadow:0 3px 0 #4a1308;margin-bottom:10px;}.feedback{text-align:center;font-size:15px;min-height:22px;color:#8b5a2b;margin-bottom:10px;font-weight:700;}.feedback.ok{color:#4a7048;}.feedback.err{color:#a02818;}.resultado-final{text-align:center;padding:20px 10px;}.resultado-emoji{font-size:64px;margin-bottom:10px;}.resultado-titulo{font-family:'Fraunces',serif;font-size:28px;font-weight:800;color:#ede0c4;margin-bottom:6px;}.resultado-score{font-family:'Fraunces',serif;font-size:48px;font-weight:800;color:#c89968;margin-bottom:16px;}.resultado-msg{font-size:14px;color:rgba(237,224,196,.7);margin-bottom:20px;line-height:1.5;}.info-panel{background:linear-gradient(180deg,rgba(237,224,196,.97),rgba(217,200,164,.97));border-radius:18px;padding:16px;color:#1a0a06;width:100%;}.info-panel h3{font-family:'Fraunces',serif;font-size:18px;font-weight:800;margin-bottom:10px;color:#4a2c14;}.info-panel p{font-size:13px;line-height:1.6;margin-bottom:8px;}.info-panel .tip{background:rgba(200,153,104,.2);border-left:3px solid #c89968;padding:8px 10px;border-radius:0 8px 8px 0;font-size:12px;margin-bottom:6px;}@keyframes float-up{0%{transform:translateY(0) rotate(0);opacity:1;}100%{transform:translateY(-100vh) rotate(720deg);opacity:0;}}.confetti{position:fixed;width:12px;height:12px;pointer-events:none;z-index:999;animation:float-up 2.5s ease-out forwards;}header{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:480px;margin-bottom:10px;z-index:1;}.logo{font-family:'Fraunces',serif;font-size:22px;font-weight:800;color:#ede0c4;letter-spacing:-0.5px;}.logo span{color:#d94a2c;}.module-name{font-size:11px;text-transform:uppercase;letter-spacing:0.18em;color:#c89968;font-weight:500;opacity:0.85;}
 </style>
 </head>
 <body>
-<header>
-  <div class="logo">Mate<span>Blocks</span></div>
-  <div class="module-name">El Reloj · 1/10</div>
-</header>
+<header><div class="logo">Mate<span>Blocks</span></div><div class="module-name">El Reloj · 1/10</div></header>
+<div class="tabs"><button class="tab active" id="tab-libre" onclick="showTab('libre')">🕐 Libre</button><button class="tab" id="tab-reto1" onclick="showTab('reto1')">🎯 Reto Leer</button><button class="tab" id="tab-reto2" onclick="showTab('reto2')">✏️ Reto Poner</button><button class="tab" id="tab-info" onclick="showTab('info')">ℹ️ Info</button></div>
 
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab active" id="tab-libre" onclick="showTab('libre')">🕐 Libre</button>
-  <button class="tab" id="tab-reto1" onclick="showTab('reto1')">🎯 Reto Leer</button>
-  <button class="tab" id="tab-reto2" onclick="showTab('reto2')">✏️ Reto Poner</button>
-  <button class="tab" id="tab-info" onclick="showTab('info')">ℹ️ Info</button>
-</div>
-
-<!-- PANEL LIBRE -->
 <div class="panel show" id="panel-libre">
-  <div class="toggle">
-    <div class="pill" id="pill"></div>
-    <button class="active" id="btn-num" onclick="setMode('num')">Números</button>
-    <button id="btn-rom" onclick="setMode('rom')">Romanos</button>
-  </div>
-  <div class="clock-wrap" id="clock-libre">
-    <svg id="svg-libre" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;">
-      <defs>
-        <radialGradient id="wg" cx="40%" cy="35%" r="65%">
-          <stop offset="0%" stop-color="#c4922a"/>
-          <stop offset="100%" stop-color="#5c3a08"/>
-        </radialGradient>
-        <radialGradient id="fg" cx="38%" cy="32%" r="65%">
-          <stop offset="0%" stop-color="#fdf5e0"/>
-          <stop offset="100%" stop-color="#d9c8a4"/>
-        </radialGradient>
-      </defs>
-      <circle cx="100" cy="100" r="98" fill="url(#wg)"/>
-      <circle cx="100" cy="100" r="88" fill="url(#fg)"/>
-      <ellipse cx="75" cy="55" rx="26" ry="13" fill="rgba(255,255,255,0.28)" transform="rotate(-25 75 55)"/>
-      <g id="ticks-l"></g>
-      <g id="nums-l"></g>
-      <line id="hand-hl" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="6" stroke-linecap="round" transform="rotate(90 100 100)"/>
-      <line id="hand-ml" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="3.5" stroke-linecap="round" transform="rotate(0 100 100)"/>
-      <circle cx="100" cy="100" r="6" fill="#b8893f"/>
-      <circle cx="100" cy="100" r="3" fill="#cc2200"/>
-    </svg>
-  </div>
-  <div class="digital">
-    <div class="time" id="time-l">3:00</div>
-    <div class="words" id="words-l">Las tres en punto</div>
-  </div>
+  <div class="toggle"><div class="pill" id="pill"></div><button class="active" id="btn-num" onclick="setMode('num')">Números</button><button id="btn-rom" onclick="setMode('rom')">Romanos</button></div>
+  <div class="toggle"><div class="pill" id="pill24"></div><button class="active" id="btn-12h" onclick="setFormat('12h')">12h</button><button id="btn-24h" onclick="setFormat('24h')">24h</button></div>
+  <div class="format-indicator" id="format-ind"></div>
+  <div class="clock-wrap" id="clock-libre"><svg id="svg-libre" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;"><defs><radialGradient id="wg" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#c4922a"/><stop offset="100%" stop-color="#5c3a08"/></radialGradient><radialGradient id="fg" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#fdf5e0"/><stop offset="100%" stop-color="#d9c8a4"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#wg)"/><circle cx="100" cy="100" r="88" fill="url(#fg)"/><ellipse cx="75" cy="55" rx="26" ry="13" fill="rgba(255,255,255,0.28)" transform="rotate(-25 75 55)"/><g id="ticks-l"></g><g id="nums-l"></g><g id="nums-24-l"></g><line id="hand-hl" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="6" stroke-linecap="round" transform="rotate(90 100 100)"/><line id="hand-ml" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="3.5" stroke-linecap="round" transform="rotate(0 100 100)"/><circle cx="100" cy="100" r="6" fill="#b8893f"/><circle cx="100" cy="100" r="3" fill="#cc2200"/></svg></div>
+  <div class="digital"><div class="time" id="time-l">3:00</div><div class="time-24h" id="time-24h-l">(15:00)</div><div class="words" id="words-l">Las tres en punto</div></div>
   <div class="feedback" id="feed-l">Arrastra las manecillas</div>
-  <div class="btns">
-    <button class="btn btn-s" onclick="setNow()">🕐 Hora real</button>
-    <button class="btn btn-s" onclick="setRandom()">🎲 Al azar</button>
-  </div>
+  <div class="btns"><button class="btn btn-s" onclick="setNow()">🕐 Hora real</button><button class="btn btn-s" onclick="setRandom()">🎲 Al azar</button></div>
 </div>
 
-<!-- PANEL RETO 1: Ver reloj → elegir hora -->
-<div class="panel" id="panel-reto1">
-  <div class="reto-wrap">
-    <div class="progress-label" id="prog-label1">Pregunta 1 / 10</div>
-    <div class="progress-bar"><div class="progress-fill" id="prog-fill1" style="width:0%"></div></div>
-    <div class="reto-question">¿Qué hora marca el reloj?</div>
-    <div class="reto-clock" id="clock-r1">
-      <svg id="svg-r1" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;">
-        <defs>
-          <radialGradient id="wg2" cx="40%" cy="35%" r="65%">
-            <stop offset="0%" stop-color="#c4922a"/>
-            <stop offset="100%" stop-color="#5c3a08"/>
-          </radialGradient>
-          <radialGradient id="fg2" cx="38%" cy="32%" r="65%">
-            <stop offset="0%" stop-color="#fdf5e0"/>
-            <stop offset="100%" stop-color="#d9c8a4"/>
-          </radialGradient>
-        </defs>
-        <circle cx="100" cy="100" r="98" fill="url(#wg2)"/>
-        <circle cx="100" cy="100" r="88" fill="url(#fg2)"/>
-        <g id="ticks-r1"></g>
-        <g id="nums-r1"></g>
-        <line id="hand-hr1" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="7" stroke-linecap="round" transform="rotate(90 100 100)"/>
-        <line id="hand-mr1" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="4" stroke-linecap="round" transform="rotate(0 100 100)"/>
-        <circle cx="100" cy="100" r="7" fill="#b8893f"/>
-        <circle cx="100" cy="100" r="3.5" fill="#cc2200"/>
-      </svg>
-    </div>
-    <div class="opciones" id="opciones-r1"></div>
-    <div class="feedback" id="feed-r1"></div>
-  </div>
-</div>
+<div class="panel" id="panel-reto1"><div class="reto-wrap"><div class="progress-label" id="prog-label1">Pregunta 1 / 10</div><div class="progress-bar"><div class="progress-fill" id="prog-fill1" style="width:0%"></div></div><div class="reto-question">¿Qué hora marca el reloj?</div><div class="reto-clock" id="clock-r1"><svg id="svg-r1" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;"><defs><radialGradient id="wg2" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#c4922a"/><stop offset="100%" stop-color="#5c3a08"/></radialGradient><radialGradient id="fg2" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#fdf5e0"/><stop offset="100%" stop-color="#d9c8a4"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#wg2)"/><circle cx="100" cy="100" r="88" fill="url(#fg2)"/><g id="ticks-r1"></g><g id="nums-r1"></g><g id="nums-24-r1" style="display:none;"></g><line id="hand-hr1" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="7" stroke-linecap="round" transform="rotate(90 100 100)"/><line id="hand-mr1" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="4" stroke-linecap="round" transform="rotate(0 100 100)"/><circle cx="100" cy="100" r="7" fill="#b8893f"/><circle cx="100" cy="100" r="3.5" fill="#cc2200"/></svg></div><div class="opciones" id="opciones-r1"></div><div class="feedback" id="feed-r1"></div></div></div>
 
-<!-- PANEL RETO 2: Ver hora digital → mover agujas -->
-<div class="panel" id="panel-reto2">
-  <div class="reto-wrap">
-    <div class="progress-label" id="prog-label2">Pregunta 1 / 10</div>
-    <div class="progress-bar"><div class="progress-fill" id="prog-fill2" style="width:0%"></div></div>
-    <div class="reto-digital" id="target-digital">3:00</div>
-    <div class="reto-words" id="target-words">Las tres en punto</div>
-    <div class="reto-instruccion">Mueve las manecillas del reloj para marcar esa hora</div>
-    <div class="clock-wrap" id="clock-r2">
-      <svg id="svg-r2" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;">
-        <defs>
-          <radialGradient id="wg3" cx="40%" cy="35%" r="65%">
-            <stop offset="0%" stop-color="#c4922a"/>
-            <stop offset="100%" stop-color="#5c3a08"/>
-          </radialGradient>
-          <radialGradient id="fg3" cx="38%" cy="32%" r="65%">
-            <stop offset="0%" stop-color="#fdf5e0"/>
-            <stop offset="100%" stop-color="#d9c8a4"/>
-          </radialGradient>
-        </defs>
-        <circle cx="100" cy="100" r="98" fill="url(#wg3)"/>
-        <circle cx="100" cy="100" r="88" fill="url(#fg3)"/>
-        <g id="ticks-r2"></g>
-        <g id="nums-r2"></g>
-        <line id="hand-hr2" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="6" stroke-linecap="round" transform="rotate(90 100 100)"/>
-        <line id="hand-mr2" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="3.5" stroke-linecap="round" transform="rotate(0 100 100)"/>
-        <circle cx="100" cy="100" r="6" fill="#b8893f"/>
-        <circle cx="100" cy="100" r="3" fill="#cc2200"/>
-      </svg>
-    </div>
-    <div class="digital" style="margin-bottom:10px;">
-      <div class="time" id="time-r2">3:00</div>
-    </div>
-    <button class="btn-comprobar" onclick="comprobarReto2()">✓ Comprobar</button>
-    <div class="feedback" id="feed-r2"></div>
-  </div>
-</div>
+<div class="panel" id="panel-reto2"><div class="reto-wrap"><div class="progress-label" id="prog-label2">Pregunta 1 / 10</div><div class="progress-bar"><div class="progress-fill" id="prog-fill2" style="width:0%"></div></div><div class="reto-digital" id="target-digital">3:00</div><div class="reto-digital-24h" id="target-digital-24h">(15:00)</div><div class="reto-context" id="reto-context"></div><div class="reto-words" id="target-words">Las tres en punto</div><div class="reto-instruccion">Mueve las manecillas del reloj para marcar esa hora</div><div class="clock-wrap" id="clock-r2"><svg id="svg-r2" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;"><defs><radialGradient id="wg3" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#c4922a"/><stop offset="100%" stop-color="#5c3a08"/></radialGradient><radialGradient id="fg3" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#fdf5e0"/><stop offset="100%" stop-color="#d9c8a4"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#wg3)"/><circle cx="100" cy="100" r="88" fill="url(#fg3)"/><g id="ticks-r2"></g><g id="nums-r2"></g><g id="nums-24-r2" style="display:none;"></g><line id="hand-hr2" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="6" stroke-linecap="round" transform="rotate(90 100 100)"/><line id="hand-mr2" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="3.5" stroke-linecap="round" transform="rotate(0 100 100)"/><circle cx="100" cy="100" r="6" fill="#b8893f"/><circle cx="100" cy="100" r="3" fill="#cc2200"/></svg></div><div class="digital" style="margin-bottom:10px;"><div class="time" id="time-r2">3:00</div><div class="time-24h" id="time-24h-r2"></div></div><button class="btn-comprobar" onclick="comprobarReto2()">✓ Comprobar</button><div class="feedback" id="feed-r2"></div></div></div>
 
-<!-- PANEL INFO -->
-<div class="panel" id="panel-info">
-  <div class="info-panel">
-    <h3>⏰ Cómo funciona El Reloj</h3>
-    <p><strong>Modo Libre:</strong> Arrastra las manecillas del reloj para explorar las horas. La manecilla <strong>negra corta</strong> marca las horas y la <strong>roja larga</strong> los minutos.</p>
-    <div class="tip">💡 Cada número del reloj vale 5 minutos. Si la manecilla larga apunta al 3, son 15 minutos.</div>
-    <p><strong>Reto Leer:</strong> El reloj muestra una hora. Elige la opción correcta entre las 4 respuestas. Son 10 preguntas y verás tu puntuación al final.</p>
-    <p><strong>Reto Poner:</strong> Se muestra una hora en digital. Debes mover las manecillas del reloj analógico hasta marcar esa hora exacta y pulsar Comprobar.</p>
-    <div class="tip">⭐ Cambia entre números arábigos y romanos con el selector de arriba.</div>
-  </div>
-</div>
+<div class="panel" id="panel-info"><div class="info-panel"><h3>⏰ El Reloj 12h y 24h</h3><p><strong>Modo Libre:</strong> Arrastra las manecillas. Alterna entre reloj 12h y 24h. Siempre ves AMBOS formatos (12h y 24h).</p><div class="tip">💡 En 24h ves números 13-24 de colores: 🔵 Mañana, 🟠 Tarde, 🟣 Noche.</div><p><strong>Reto Leer:</strong> El reloj muestra una hora. Elige la opción correcta (AMBOS formatos 12h / 24h). 10 preguntas.</p><p><strong>Reto Poner:</strong> Hora digital en ambos formatos. Mueve las agujas y pulsa Comprobar. Contextos reales incluidos.</p><div class="tip">⭐ Aprende conversión: 3:00 = 15:00, 7:00 = 07:00, etc.</div></div></div>
 
 <script>
-(function() {
-
-var NOMBRES = ['doce','una','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once'];
-var ROMAN   = ['XII','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
-var ARABIC  = ['12','1','2','3','4','5','6','7','8','9','10','11'];
-
-var libre = { h:3, m:0, mode:'num', dragging:null };
-var r1 = { q:0, aciertos:0, respondida:false };
-var r2 = { q:0, aciertos:0, h:0, m:0, targetH:0, targetM:0, dragging:null };
-
-var PREGUNTAS = [
-  {h:3,m:0},{h:6,m:30},{h:9,m:15},{h:12,m:0},
-  {h:5,m:45},{h:7,m:20},{h:2,m:50},{h:10,m:10},
-  {h:1,m:30},{h:4,m:45},{h:8,m:0},{h:11,m:25},
-  {h:3,m:30},{h:6,m:0},{h:9,m:45},{h:12,m:15}
-];
-
-function shuffle(arr){
-  var a=arr.slice();
-  for(var i=a.length-1;i>0;i--){
-    var j=Math.floor(Math.random()*(i+1));
-    var t=a[i];a[i]=a[j];a[j]=t;
-  }
-  return a;
-}
-
-function pad(n){ return n<10?'0'+n:''+n; }
-
-function toWords(h,m){
-  var n=NOMBRES[h%12];
-  var art=(h%12===1)?'La':'Las';
-  if(m===0)  return art+' '+n+' en punto';
-  if(m===15) return art+' '+n+' y cuarto';
-  if(m===30) return art+' '+n+' y media';
-  if(m===45){
-    var n2=NOMBRES[(h+1)%12];
-    return ((h+1)%12===1?'La':'Las')+' '+n2+' menos cuarto';
-  }
-  if(m<30) return art+' '+n+' y '+m;
-  var n3=NOMBRES[(h+1)%12];
-  return ((h+1)%12===1?'La':'Las')+' '+n3+' menos '+(60-m);
-}
-
-function buildTicks(g){
-  var html='';
-  for(var i=0;i<60;i++){
-    var angle=i*6, major=(i%5===0);
-    var r1=84, r2=major?74:80, w=major?2.5:1;
-    var rad=(angle-90)*Math.PI/180;
-    var x1=100+r1*Math.cos(rad), y1=100+r1*Math.sin(rad);
-    var x2=100+r2*Math.cos(rad), y2=100+r2*Math.sin(rad);
-    var col=major?'#1a0e06':'#4a3520';
-    html+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round"/>';
-  }
-  g.innerHTML=html;
-}
-
-function buildNums(g, mode){
-  var set=mode==='rom'?ROMAN:ARABIC;
-  var r=64, fs=mode==='rom'?10:13;
-  var ff=mode==='rom'?'Georgia,serif':'Fraunces,serif';
-  var html='';
-  for(var i=0;i<12;i++){
-    var angle=(i*30-90)*Math.PI/180;
-    var x=100+r*Math.cos(angle), y=100+r*Math.sin(angle)+fs*0.35;
-    html+='<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+ff+'" font-size="'+fs+'" font-weight="700" fill="#1a0e06">'+set[i]+'</text>';
-  }
-  g.innerHTML=html;
-}
-
-function setHands(hEl, mEl, h, m){
-  var hDeg=h*30+m*0.5, mDeg=m*6;
-  hEl.setAttribute('transform','rotate('+hDeg+' 100 100)');
-  mEl.setAttribute('transform','rotate('+mDeg+' 100 100)');
-}
-
-buildTicks(document.getElementById('ticks-l'));
-buildTicks(document.getElementById('ticks-r1'));
-buildTicks(document.getElementById('ticks-r2'));
-buildNums(document.getElementById('nums-l'),'num');
-buildNums(document.getElementById('nums-r1'),'num');
-buildNums(document.getElementById('nums-r2'),'num');
-
-function updateLibre(){
-  setHands(document.getElementById('hand-hl'), document.getElementById('hand-ml'), libre.h, libre.m);
-  var h12=libre.h===0?12:libre.h;
-  document.getElementById('time-l').textContent=h12+':'+pad(libre.m);
-  document.getElementById('words-l').textContent=toWords(libre.h,libre.m);
-}
+(function(){
+var NOMBRES=['doce','una','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once'];
+var ROMAN=['XII','I','II','III','IV','V','VI','VII','VIII','IX','X','XI'];
+var ARABIC=['12','1','2','3','4','5','6','7','8','9','10','11'];
+var CONTEXTOS=[{h:7,m:0,ctx:'Desayuno 🥣'},{h:9,m:0,ctx:'Clase 📚'},{h:11,m:30,ctx:'Recreo 🎮'},{h:14,m:0,ctx:'Comida 🍽️'},{h:16,m:0,ctx:'Merienda 🍎'},{h:18,m:30,ctx:'Deporte ⚽'},{h:20,m:0,ctx:'Cena 🍜'},{h:21,m:0,ctx:'Dormir 😴'}];
+var libre={h:3,m:0,mode:'num',format:'12h',dragging:null};var r1={q:0,aciertos:0,respondida:false};var r2={q:0,aciertos:0,h:0,m:0,targetH:0,targetM:0,dragging:null};
+var PREGUNTAS=[{h:3,m:0},{h:6,m:30},{h:9,m:15},{h:12,m:0},{h:5,m:45},{h:7,m:20},{h:2,m:50},{h:10,m:10},{h:1,m:30},{h:4,m:45},{h:8,m:0},{h:11,m:25},{h:3,m:30},{h:6,m:0},{h:9,m:45},{h:12,m:15}];
+function shuffle(a){var a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}function pad(n){return n<10?'0'+n:''+n;}function getPeriod(h24){if(h24>=6&&h24<12)return{name:'Mañana',icon:'🔵',color:'#3498db'};if(h24>=12&&h24<18)return{name:'Tarde',icon:'🟠',color:'#e67e22'};return{name:'Noche',icon:'🟣',color:'#9b59b6'};}
+function toWords(h,m){var n=NOMBRES[h%12];var art=(h%12===1)?'La':'Las';if(m===0)return art+' '+n+' en punto';if(m===15)return art+' '+n+' y cuarto';if(m===30)return art+' '+n+' y media';if(m===45){var n2=NOMBRES[(h+1)%12];return ((h+1)%12===1?'La':'Las')+' '+n2+' menos cuarto';}if(m<30)return art+' '+n+' y '+m;var n3=NOMBRES[(h+1)%12];return ((h+1)%12===1?'La':'Las')+' '+n3+' menos '+(60-m);}
+function buildTicks(g){var html='';for(var i=0;i<60;i++){var angle=i*6,major=(i%5===0);var r1=84,r2=major?74:80,w=major?2.5:1;var rad=(angle-90)*Math.PI/180;var x1=100+r1*Math.cos(rad),y1=100+r1*Math.sin(rad);var x2=100+r2*Math.cos(rad),y2=100+r2*Math.sin(rad);var col=major?'#1a0e06':'#4a3520';html+='<line x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round"/>';}g.innerHTML=html;}
+function buildNums(g,mode){var set=mode==='rom'?ROMAN:ARABIC;var r=64,fs=mode==='rom'?10:13;var ff=mode==='rom'?'Georgia,serif':'Fraunces,serif';var html='';for(var i=0;i<12;i++){var angle=(i*30-90)*Math.PI/180;var x=100+r*Math.cos(angle),y=100+r*Math.sin(angle)+fs*0.35;html+='<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="'+ff+'" font-size="'+fs+'" font-weight="700" fill="#1a0e06">'+set[i]+'</text>';}g.innerHTML=html;}
+function buildNums24h(g){var html='';for(var i=0;i<12;i++){var h24=i===0?0:(12+i);var p=getPeriod(h24);var angle=(i*30-90)*Math.PI/180;var r=48;var x=100+r*Math.cos(angle),y=100+r*Math.sin(angle);var txt=h24<10?'0'+h24:''+h24;html+='<text x="'+x+'" y="'+y+'" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="9" font-weight="700" fill="'+p.color+'">'+txt+'</text>';}g.innerHTML=html;}
+function setHands(hEl,mEl,h,m){var hDeg=h*30+m*0.5,mDeg=m*6;hEl.setAttribute('transform','rotate('+hDeg+' 100 100)');mEl.setAttribute('transform','rotate('+mDeg+' 100 100)');}
+buildTicks(document.getElementById('ticks-l'));buildTicks(document.getElementById('ticks-r1'));buildTicks(document.getElementById('ticks-r2'));buildNums(document.getElementById('nums-l'),'num');buildNums(document.getElementById('nums-r1'),'num');buildNums(document.getElementById('nums-r2'),'num');buildNums24h(document.getElementById('nums-24-l'));buildNums24h(document.getElementById('nums-24-r1'));buildNums24h(document.getElementById('nums-24-r2'));
+function updateLibre(){setHands(document.getElementById('hand-hl'),document.getElementById('hand-ml'),libre.h,libre.m);var h12=libre.h===0?12:libre.h;var h24=libre.h===0?0:(libre.h+12);document.getElementById('time-l').textContent=h12+':'+pad(libre.m);document.getElementById('time-24h-l').textContent='('+pad(h24)+':'+pad(libre.m)+')';document.getElementById('words-l').textContent=toWords(libre.h,libre.m);if(libre.format==='24h'){document.getElementById('nums-24-l').style.display='';document.getElementById('nums-l').style.display='none';document.getElementById('format-ind').textContent=getPeriod(h24).icon+' '+getPeriod(h24).name;}else{document.getElementById('nums-24-l').style.display='none';document.getElementById('nums-l').style.display='';document.getElementById('format-ind').textContent='';}}
 updateLibre();
-
-function getAngle(e, svgEl){
-  var rect=svgEl.getBoundingClientRect();
-  var cx=rect.left+rect.width/2, cy=rect.top+rect.height/2;
-  var pt=e.touches?e.touches[0]:e;
-  var angle=Math.atan2(pt.clientY-cy,pt.clientX-cx)*180/Math.PI+90;
-  if(angle<0) angle+=360;
-  return angle;
-}
-
-var wrapL=document.getElementById('clock-libre');
-var svgL=document.getElementById('svg-libre');
-
-wrapL.addEventListener('mousedown',function(e){
-  e.preventDefault();
-  var a=getAngle(e,svgL);
-  var hDeg=libre.h*30+libre.m*0.5, mDeg=libre.m*6;
-  var dh=Math.min(Math.abs(a-hDeg),360-Math.abs(a-hDeg));
-  var dm=Math.min(Math.abs(a-mDeg),360-Math.abs(a-mDeg));
-  libre.dragging=dh<dm?'h':'m';
-});
-wrapL.addEventListener('touchstart',function(e){
-  e.preventDefault();
-  var a=getAngle(e,svgL);
-  var hDeg=libre.h*30+libre.m*0.5, mDeg=libre.m*6;
-  var dh=Math.min(Math.abs(a-hDeg),360-Math.abs(a-hDeg));
-  var dm=Math.min(Math.abs(a-mDeg),360-Math.abs(a-mDeg));
-  libre.dragging=dh<dm?'h':'m';
-},{passive:false});
-
-document.addEventListener('mousemove',function(e){
-  if(!libre.dragging) return;
-  e.preventDefault();
-  var a=getAngle(e,svgL);
-  if(libre.dragging==='m'){
-    var nm=Math.round(a/6)%60;
-    if(libre.m>45&&nm<15) libre.h=(libre.h+1)%12;
-    else if(libre.m<15&&nm>45) libre.h=(libre.h+11)%12;
-    libre.m=nm;
-  } else { libre.h=Math.round(a/30)%12; }
-  updateLibre();
-});
-document.addEventListener('touchmove',function(e){
-  if(!libre.dragging) return;
-  e.preventDefault();
-  var a=getAngle(e,svgL);
-  if(libre.dragging==='m'){
-    var nm=Math.round(a/6)%60;
-    if(libre.m>45&&nm<15) libre.h=(libre.h+1)%12;
-    else if(libre.m<15&&nm>45) libre.h=(libre.h+11)%12;
-    libre.m=nm;
-  } else { libre.h=Math.round(a/30)%12; }
-  updateLibre();
-},{passive:false});
-document.addEventListener('mouseup',function(){ libre.dragging=null; });
-document.addEventListener('touchend',function(){ libre.dragging=null; });
-
-var wrapR2=document.getElementById('clock-r2');
-var svgR2=document.getElementById('svg-r2');
-
-wrapR2.addEventListener('mousedown',function(e){
-  e.preventDefault();
-  var a=getAngle(e,svgR2);
-  var hDeg=r2.h*30+r2.m*0.5, mDeg=r2.m*6;
-  var dh=Math.min(Math.abs(a-hDeg),360-Math.abs(a-hDeg));
-  var dm=Math.min(Math.abs(a-mDeg),360-Math.abs(a-mDeg));
-  r2.dragging=dh<dm?'h':'m';
-});
-wrapR2.addEventListener('touchstart',function(e){
-  e.preventDefault();
-  var a=getAngle(e,svgR2);
-  var hDeg=r2.h*30+r2.m*0.5, mDeg=r2.m*6;
-  var dh=Math.min(Math.abs(a-hDeg),360-Math.abs(a-hDeg));
-  var dm=Math.min(Math.abs(a-mDeg),360-Math.abs(a-mDeg));
-  r2.dragging=dh<dm?'h':'m';
-},{passive:false});
-
-document.addEventListener('mousemove',function(e){
-  if(!r2.dragging) return;
-  var a=getAngle(e,svgR2);
-  if(r2.dragging==='m'){
-    var nm=Math.round(a/6)%60;
-    if(r2.m>45&&nm<15) r2.h=(r2.h+1)%12;
-    else if(r2.m<15&&nm>45) r2.h=(r2.h+11)%12;
-    r2.m=nm;
-  } else { r2.h=Math.round(a/30)%12; }
-  setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);
-  var h12=r2.h===0?12:r2.h;
-  document.getElementById('time-r2').textContent=h12+':'+pad(r2.m);
-});
-document.addEventListener('touchmove',function(e){
-  if(!r2.dragging) return;
-  e.preventDefault();
-  var a=getAngle(e,svgR2);
-  if(r2.dragging==='m'){
-    var nm=Math.round(a/6)%60;
-    if(r2.m>45&&nm<15) r2.h=(r2.h+1)%12;
-    else if(r2.m<15&&nm>45) r2.h=(r2.h+11)%12;
-    r2.m=nm;
-  } else { r2.h=Math.round(a/30)%12; }
-  setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);
-  var h12=r2.h===0?12:r2.h;
-  document.getElementById('time-r2').textContent=h12+':'+pad(r2.m);
-},{passive:false});
-document.addEventListener('mouseup',function(){ r2.dragging=null; });
-document.addEventListener('touchend',function(){ r2.dragging=null; });
-
-window.showTab = function(tab){
-  ['libre','reto1','reto2','info'].forEach(function(t){
-    document.getElementById('panel-'+t).classList.remove('show');
-    document.getElementById('tab-'+t).classList.remove('active');
-  });
-  document.getElementById('panel-'+tab).classList.add('show');
-  document.getElementById('tab-'+tab).classList.add('active');
-  if(tab==='reto1' && r1.q===0) initReto1();
-  if(tab==='reto2' && r2.q===0) initReto2();
-};
-
-window.setMode = function(m){
-  libre.mode=m;
-  document.getElementById('btn-num').classList.toggle('active',m==='num');
-  document.getElementById('btn-rom').classList.toggle('active',m==='rom');
-  document.getElementById('pill').style.left=m==='rom'?'calc(50%)':'4px';
-  buildNums(document.getElementById('nums-l'),m);
-};
-
-window.setNow = function(){
-  var now=new Date();
-  libre.h=now.getHours()%12; libre.m=now.getMinutes();
-  updateLibre();
-};
-window.setRandom = function(){
-  libre.h=Math.floor(Math.random()*12);
-  var opts=[0,5,10,15,20,25,30,35,40,45,50,55];
-  libre.m=opts[Math.floor(Math.random()*opts.length)];
-  updateLibre();
-};
-
+function getAngle(e,svgEl){var rect=svgEl.getBoundingClientRect();var cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;var pt=e.touches?e.touches[0]:e;var angle=Math.atan2(pt.clientY-cy,pt.clientX-cx)*180/Math.PI+90;if(angle<0)angle+=360;return angle;}
+var wrapL=document.getElementById('clock-libre');var svgL=document.getElementById('svg-libre');
+wrapL.addEventListener('mousedown',function(e){e.preventDefault();var a=getAngle(e,svgL);var hDeg=libre.h*30+libre.m*0.5,mDeg=libre.m*6;var dh=Math.min(Math.abs(a-hDeg),360-Math.abs(a-hDeg));var dm=Math.min(Math.abs(a-mDeg),360-Math.abs(a-mDeg));libre.dragging=dh<dm?'h':'m';});
+wrapL.addEventListener('touchstart',function(e){e.preventDefault();var a=getAngle(e,svgL);var hDeg=libre.h*30+libre.m*0.5,mDeg=libre.m*6;var dh=Math.min(Math.abs(a-hDeg),360-Math.abs(a-hDeg));var dm=Math.min(Math.abs(a-mDeg),360-Math.abs(a-mDeg));libre.dragging=dh<dm?'h':'m';},{passive:false});
+document.addEventListener('mousemove',function(e){if(!libre.dragging)return;e.preventDefault();var a=getAngle(e,svgL);if(libre.dragging==='m'){var nm=Math.round(a/6)%60;if(libre.m>45&&nm<15)libre.h=(libre.h+1)%12;else if(libre.m<15&&nm>45)libre.h=(libre.h+11)%12;libre.m=nm;}else{libre.h=Math.round(a/30)%12;}updateLibre();});
+document.addEventListener('touchmove',function(e){if(!libre.dragging)return;e.preventDefault();var a=getAngle(e,svgL);if(libre.dragging==='m'){var nm=Math.round(a/6)%60;if(libre.m>45&&nm<15)libre.h=(libre.h+1)%12;else if(libre.m<15&&nm>45)libre.h=(libre.h+11)%12;libre.m=nm;}else{libre.h=Math.round(a/30)%12;}updateLibre();},{passive:false});
+document.addEventListener('mouseup',function(){libre.dragging=null;});document.addEventListener('touchend',function(){libre.dragging=null;});
+var wrapR2=document.getElementById('clock-r2');var svgR2=document.getElementById('svg-r2');
+wrapR2.addEventListener('mousedown',function(e){e.preventDefault();var a=getAngle(e,svgR2);var hDeg=r2.h*30+r2.m*0.5,mDeg=r2.m*6;var dh=Math.min(Math.abs(a-hDeg),360-Math.abs(a-hDeg));var dm=Math.min(Math.abs(a-mDeg),360-Math.abs(a-mDeg));r2.dragging=dh<dm?'h':'m';});
+wrapR2.addEventListener('touchstart',function(e){e.preventDefault();var a=getAngle(e,svgR2);var hDeg=r2.h*30+r2.m*0.5,mDeg=r2.m*6;var dh=Math.min(Math.abs(a-hDeg),360-Math.abs(a-hDeg));var dm=Math.min(Math.abs(a-mDeg),360-Math.abs(a-mDeg));r2.dragging=dh<dm?'h':'m';},{passive:false});
+document.addEventListener('mousemove',function(e){if(!r2.dragging)return;var a=getAngle(e,svgR2);if(r2.dragging==='m'){var nm=Math.round(a/6)%60;if(r2.m>45&&nm<15)r2.h=(r2.h+1)%12;else if(r2.m<15&&nm>45)r2.h=(r2.h+11)%12;r2.m=nm;}else{r2.h=Math.round(a/30)%12;}setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);var h12=r2.h===0?12:r2.h;var h24=r2.h===0?0:(r2.h+12);document.getElementById('time-r2').textContent=h12+':'+pad(r2.m);document.getElementById('time-24h-r2').textContent=pad(h24)+':'+pad(r2.m);});
+document.addEventListener('touchmove',function(e){if(!r2.dragging)return;e.preventDefault();var a=getAngle(e,svgR2);if(r2.dragging==='m'){var nm=Math.round(a/6)%60;if(r2.m>45&&nm<15)r2.h=(r2.h+1)%12;else if(r2.m<15&&nm>45)r2.h=(r2.h+11)%12;r2.m=nm;}else{r2.h=Math.round(a/30)%12;}setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);var h12=r2.h===0?12:r2.h;var h24=r2.h===0?0:(r2.h+12);document.getElementById('time-r2').textContent=h12+':'+pad(r2.m);document.getElementById('time-24h-r2').textContent=pad(h24)+':'+pad(r2.m);},{passive:false});
+document.addEventListener('mouseup',function(){r2.dragging=null;});document.addEventListener('touchend',function(){r2.dragging=null;});
+window.showTab=function(tab){['libre','reto1','reto2','info'].forEach(function(t){document.getElementById('panel-'+t).classList.remove('show');document.getElementById('tab-'+t).classList.remove('active');});document.getElementById('panel-'+tab).classList.add('show');document.getElementById('tab-'+tab).classList.add('active');if(tab==='reto1'&&r1.q===0)initReto1();if(tab==='reto2'&&r2.q===0)initReto2();};
+window.setMode=function(m){libre.mode=m;document.getElementById('btn-num').classList.toggle('active',m==='num');document.getElementById('btn-rom').classList.toggle('active',m==='rom');document.getElementById('pill').style.left=m==='rom'?'calc(50%)':'4px';buildNums(document.getElementById('nums-l'),m);};
+window.setFormat=function(fmt){libre.format=fmt;document.getElementById('btn-12h').classList.toggle('active',fmt==='12h');document.getElementById('btn-24h').classList.toggle('active',fmt==='24h');document.getElementById('pill24').style.left=fmt==='24h'?'calc(50%)':'4px';updateLibre();};
+window.setNow=function(){var now=new Date();libre.h=now.getHours()%12;libre.m=now.getMinutes();updateLibre();};
+window.setRandom=function(){libre.h=Math.floor(Math.random()*12);var opts=[0,5,10,15,20,25,30,35,40,45,50,55];libre.m=opts[Math.floor(Math.random()*opts.length)];updateLibre();};
 var r1Preguntas=[];
-
-function initReto1(){
-  r1Preguntas=shuffle(PREGUNTAS).slice(0,10);
-  r1.q=0; r1.aciertos=0;
-  mostrarPreguntaR1();
-}
-
-function mostrarPreguntaR1(){
-  if(r1.q>=10){ mostrarResultado('panel-reto1',r1.aciertos,'reto1'); return; }
-  r1.respondida=false;
-  var p=r1Preguntas[r1.q];
-  document.getElementById('prog-label1').textContent='Pregunta '+(r1.q+1)+' / 10';
-  document.getElementById('prog-fill1').style.width=(r1.q*10)+'%';
-  document.getElementById('feed-r1').textContent='';
-  document.getElementById('feed-r1').className='feedback';
-  setHands(document.getElementById('hand-hr1'),document.getElementById('hand-mr1'),p.h,p.m);
-  var correcta=timeStr(p.h,p.m);
-  var opciones=[correcta];
-  var intentos=0;
-  while(opciones.length<4 && intentos<50){
-    intentos++;
-    var rh=Math.floor(Math.random()*12);
-    var rm=[0,5,10,15,20,25,30,35,40,45,50,55][Math.floor(Math.random()*12)];
-    var s=timeStr(rh,rm);
-    if(opciones.indexOf(s)===-1) opciones.push(s);
-  }
-  opciones=shuffle(opciones);
-  var cont=document.getElementById('opciones-r1');
-  cont.innerHTML='';
-  opciones.forEach(function(op){
-    var btn=document.createElement('button');
-    btn.className='opcion';
-    btn.textContent=op;
-    btn.onclick=function(){
-      if(r1.respondida) return;
-      r1.respondida=true;
-      if(op===correcta){
-        btn.classList.add('correct');
-        r1.aciertos++;
-        document.getElementById('feed-r1').textContent='¡Correcto! ✓';
-        document.getElementById('feed-r1').className='feedback ok';
-        celebrate();
-      } else {
-        btn.classList.add('wrong');
-        document.getElementById('feed-r1').textContent='Era '+correcta;
-        document.getElementById('feed-r1').className='feedback err';
-        cont.querySelectorAll('.opcion').forEach(function(b){
-          if(b.textContent===correcta) b.classList.add('correct');
-        });
-      }
-      r1.q++;
-      setTimeout(mostrarPreguntaR1,1400);
-    };
-    cont.appendChild(btn);
-  });
-}
-
-function timeStr(h,m){
-  var h12=h===0?12:h;
-  return h12+':'+pad(m);
-}
-
+function initReto1(){r1Preguntas=shuffle(PREGUNTAS).slice(0,10);r1.q=0;r1.aciertos=0;mostrarPreguntaR1();}
+function mostrarPreguntaR1(){if(r1.q>=10){mostrarResultado('panel-reto1',r1.aciertos,'reto1');return;}r1.respondida=false;var p=r1Preguntas[r1.q];document.getElementById('prog-label1').textContent='Pregunta '+(r1.q+1)+' / 10';document.getElementById('prog-fill1').style.width=(r1.q*10)+'%';document.getElementById('feed-r1').textContent='';document.getElementById('feed-r1').className='feedback';setHands(document.getElementById('hand-hr1'),document.getElementById('hand-mr1'),p.h,p.m);var h12=p.h===0?12:p.h;var h24=p.h===0?0:(p.h+12);var correcta=h12+':'+pad(p.m)+' / '+pad(h24)+':'+pad(p.m);var opciones=[correcta];var intentos=0;while(opciones.length<4&&intentos<50){intentos++;var rh=Math.floor(Math.random()*12);var rm=[0,5,10,15,20,25,30,35,40,45,50,55][Math.floor(Math.random()*12)];var rh12=rh===0?12:rh;var rh24=rh===0?0:(rh+12);var s=rh12+':'+pad(rm)+' / '+pad(rh24)+':'+pad(rm);if(opciones.indexOf(s)===-1)opciones.push(s);}opciones=shuffle(opciones);var cont=document.getElementById('opciones-r1');cont.innerHTML='';opciones.forEach(function(op){var btn=document.createElement('button');btn.className='opcion';btn.textContent=op;btn.onclick=function(){if(r1.respondida)return;r1.respondida=true;if(op===correcta){btn.classList.add('correct');r1.aciertos++;document.getElementById('feed-r1').textContent='¡Correcto! ✓';document.getElementById('feed-r1').className='feedback ok';celebrate();window.MB.soundOk();}else{btn.classList.add('wrong');window.MB.soundErr();document.getElementById('feed-r1').textContent='Era '+correcta;document.getElementById('feed-r1').className='feedback err';cont.querySelectorAll('.opcion').forEach(function(b){if(b.textContent===correcta)b.classList.add('correct');});}r1.q++;setTimeout(mostrarPreguntaR1,1400);};cont.appendChild(btn);});}
 var r2Preguntas=[];
-
-function initReto2(){
-  r2Preguntas=shuffle(PREGUNTAS).slice(0,10);
-  r2.q=0; r2.aciertos=0;
-  mostrarPreguntaR2();
-}
-
-function mostrarPreguntaR2(){
-  if(r2.q>=10){ mostrarResultado('panel-reto2',r2.aciertos,'reto2'); return; }
-  var p=r2Preguntas[r2.q];
-  r2.targetH=p.h; r2.targetM=p.m;
-  r2.h=(p.h+5)%12; r2.m=(p.m+25)%60;
-  document.getElementById('prog-label2').textContent='Pregunta '+(r2.q+1)+' / 10';
-  document.getElementById('prog-fill2').style.width=(r2.q*10)+'%';
-  document.getElementById('feed-r2').textContent='';
-  document.getElementById('feed-r2').className='feedback';
-  var h12=p.h===0?12:p.h;
-  document.getElementById('target-digital').textContent=h12+':'+pad(p.m);
-  document.getElementById('target-words').textContent=toWords(p.h,p.m);
-  setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);
-  var ch12=r2.h===0?12:r2.h;
-  document.getElementById('time-r2').textContent=ch12+':'+pad(r2.m);
-}
-
-window.comprobarReto2 = function(){
-  var hOk=r2.h===(r2.targetH%12);
-  var mOk=r2.m===r2.targetM;
-  if(hOk && mOk){
-    document.getElementById('feed-r2').textContent='¡Perfecto! ✓';
-    document.getElementById('feed-r2').className='feedback ok';
-    r2.aciertos++;
-    celebrate();
-    r2.q++;
-    setTimeout(mostrarPreguntaR2,1200);
-  } else {
-    var md=Math.min(Math.abs(r2.m-r2.targetM),60-Math.abs(r2.m-r2.targetM));
-    if(hOk && md<=5){
-      document.getElementById('feed-r2').textContent='¡Casi! Ajusta un poco los minutos';
-    } else if(hOk){
-      document.getElementById('feed-r2').textContent='La hora está bien, ajusta los minutos';
-    } else {
-      document.getElementById('feed-r2').textContent='Sigue intentándolo';
-    }
-    document.getElementById('feed-r2').className='feedback err';
-  }
-};
-
-function mostrarResultado(panelId, aciertos, retoId){
-  var panel=document.getElementById(panelId);
-  var emoji=aciertos>=9?'🏆':aciertos>=7?'⭐':aciertos>=5?'👍':'💪';
-  var msg=aciertos>=9?'¡Excelente! Eres un experto en el reloj.':
-          aciertos>=7?'¡Muy bien! Casi perfecto.':
-          aciertos>=5?'Bien, pero puedes mejorar con más práctica.':
-          'Sigue practicando. ¡Tú puedes!';
-  panel.querySelector('.reto-wrap').innerHTML=
-    '<div class="resultado-final">'+
-    '<div class="resultado-emoji">'+emoji+'</div>'+
-    '<div class="resultado-titulo">¡Test completado!</div>'+
-    '<div class="resultado-score">'+aciertos+' / 10</div>'+
-    '<div class="resultado-msg">'+msg+'</div>'+
-    '<button class="btn btn-r" onclick="reiniciarReto(\''+retoId+'\')">🔄 Repetir</button>'+
-    '</div>';
-}
-
-window.reiniciarReto = function(id){
-  if(id==='reto1'){
-    var panel=document.getElementById('panel-reto1');
-    panel.innerHTML=
-      '<div class="reto-wrap">'+
-      '<div class="progress-label" id="prog-label1">Pregunta 1 / 10</div>'+
-      '<div class="progress-bar"><div class="progress-fill" id="prog-fill1" style="width:0%"></div></div>'+
-      '<div class="reto-question">¿Qué hora marca el reloj?</div>'+
-      '<div class="reto-clock" id="clock-r1"><svg id="svg-r1" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;"><defs><radialGradient id="wg2b" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#c4922a"/><stop offset="100%" stop-color="#5c3a08"/></radialGradient><radialGradient id="fg2b" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#fdf5e0"/><stop offset="100%" stop-color="#d9c8a4"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#wg2b)"/><circle cx="100" cy="100" r="88" fill="url(#fg2b)"/><g id="ticks-r1"></g><g id="nums-r1"></g><line id="hand-hr1" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="7" stroke-linecap="round" transform="rotate(90 100 100)"/><line id="hand-mr1" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="4" stroke-linecap="round" transform="rotate(0 100 100)"/><circle cx="100" cy="100" r="7" fill="#b8893f"/><circle cx="100" cy="100" r="3.5" fill="#cc2200"/></svg></div>'+
-      '<div class="opciones" id="opciones-r1"></div>'+
-      '<div class="feedback" id="feed-r1"></div>'+
-      '</div>';
-    buildTicks(document.getElementById('ticks-r1'));
-    buildNums(document.getElementById('nums-r1'),'num');
-    r1.q=0; r1.aciertos=0;
-    mostrarPreguntaR1();
-  } else {
-    r2.q=0; r2.aciertos=0;
-    initReto2();
-  }
-};
-
-function celebrate(){
-  var colors=['#a02818','#4a7048','#b8893f','#d94a2c','#f4d896'];
-  for(var i=0;i<18;i++){
-    (function(){
-      var c=document.createElement('div');
-      c.className='confetti';
-      c.style.left=(Math.random()*100)+'vw';
-      c.style.bottom='0';
-      c.style.background=colors[Math.floor(Math.random()*colors.length)];
-      c.style.borderRadius=Math.random()>.5?'50%':'2px';
-      c.style.animationDelay=(Math.random()*.3)+'s';
-      c.style.animationDuration=(2+Math.random())+'s';
-      document.body.appendChild(c);
-      setTimeout(function(){if(c.parentNode)c.parentNode.removeChild(c);},3000);
-    })();
-  }
-}
-
+function initReto2(){r2Preguntas=shuffle(CONTEXTOS).slice(0,10);r2.q=0;r2.aciertos=0;mostrarPreguntaR2();}
+function mostrarPreguntaR2(){if(r2.q>=10){mostrarResultado('panel-reto2',r2.aciertos,'reto2');return;}var p=r2Preguntas[r2.q];r2.targetH=p.h;r2.targetM=p.m;r2.h=(p.h+5)%12;r2.m=(p.m+25)%60;document.getElementById('prog-label2').textContent='Pregunta '+(r2.q+1)+' / 10';document.getElementById('prog-fill2').style.width=(r2.q*10)+'%';document.getElementById('feed-r2').textContent='';document.getElementById('feed-r2').className='feedback';var h12=p.h===0?12:p.h;var h24=p.h===0?0:p.h;document.getElementById('target-digital').textContent=h12+':'+pad(p.m);document.getElementById('target-digital-24h').textContent='('+pad(h24)+':'+pad(p.m)+')';document.getElementById('reto-context').textContent=p.ctx;document.getElementById('target-words').textContent=toWords(p.h,p.m);setHands(document.getElementById('hand-hr2'),document.getElementById('hand-mr2'),r2.h,r2.m);var ch12=r2.h===0?12:r2.h;var ch24=r2.h===0?0:(r2.h+12);document.getElementById('time-r2').textContent=ch12+':'+pad(r2.m);document.getElementById('time-24h-r2').textContent=pad(ch24)+':'+pad(r2.m);}
+window.comprobarReto2=function(){var hOk=r2.h===(r2.targetH%12);var mOk=r2.m===r2.targetM;if(hOk&&mOk){document.getElementById('feed-r2').textContent='¡Perfecto! ✓';document.getElementById('feed-r2').className='feedback ok';r2.aciertos++;celebrate();window.MB.soundOk();r2.q++;setTimeout(mostrarPreguntaR2,1200);}else{var md=Math.min(Math.abs(r2.m-r2.targetM),60-Math.abs(r2.m-r2.targetM));if(hOk&&md<=5){document.getElementById('feed-r2').textContent='¡Casi! Ajusta un poco los minutos';}else if(hOk){document.getElementById('feed-r2').textContent='La hora está bien, ajusta los minutos';}else{document.getElementById('feed-r2').textContent='Sigue intentándolo';}document.getElementById('feed-r2').className='feedback err';}};
+function mostrarResultado(panelId,aciertos,retoId){var panel=document.getElementById(panelId);var emoji=aciertos>=9?'🏆':aciertos>=7?'⭐':aciertos>=5?'👍':'💪';var msg=aciertos>=9?'¡Excelente! Eres un experto en el reloj.':aciertos>=7?'¡Muy bien! Casi perfecto.':aciertos>=5?'Bien, pero puedes mejorar con más práctica.':'Sigue practicando. ¡Tú puedes!';panel.querySelector('.reto-wrap').innerHTML='<div class="resultado-final"><div class="resultado-emoji">'+emoji+'</div><div class="resultado-titulo">¡Test completado!</div><div class="resultado-score">'+aciertos+' / 10</div><div class="resultado-msg">'+msg+'</div><button class="btn btn-r" onclick="reiniciarReto(\''+retoId+'\')">🔄 Repetir</button></div>';}
+window.reiniciarReto=function(id){if(id==='reto1'){var panel=document.getElementById('panel-reto1');panel.innerHTML='<div class="reto-wrap"><div class="progress-label" id="prog-label1">Pregunta 1 / 10</div><div class="progress-bar"><div class="progress-fill" id="prog-fill1" style="width:0%"></div></div><div class="reto-question">¿Qué hora marca el reloj?</div><div class="reto-clock" id="clock-r1"><svg id="svg-r1" viewBox="0 0 200 200" width="100%" height="100%" style="display:block;"><defs><radialGradient id="wg2b" cx="40%" cy="35%" r="65%"><stop offset="0%" stop-color="#c4922a"/><stop offset="100%" stop-color="#5c3a08"/></radialGradient><radialGradient id="fg2b" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#fdf5e0"/><stop offset="100%" stop-color="#d9c8a4"/></radialGradient></defs><circle cx="100" cy="100" r="98" fill="url(#wg2b)"/><circle cx="100" cy="100" r="88" fill="url(#fg2b)"/><g id="ticks-r1"></g><g id="nums-r1"></g><g id="nums-24-r1" style="display:none;"></g><line id="hand-hr1" x1="100" y1="100" x2="100" y2="65" stroke="#1a0e06" stroke-width="7" stroke-linecap="round" transform="rotate(90 100 100)"/><line id="hand-mr1" x1="100" y1="100" x2="100" y2="48" stroke="#cc2200" stroke-width="4" stroke-linecap="round" transform="rotate(0 100 100)"/><circle cx="100" cy="100" r="7" fill="#b8893f"/><circle cx="100" cy="100" r="3.5" fill="#cc2200"/></svg></div><div class="opciones" id="opciones-r1"></div><div class="feedback" id="feed-r1"></div></div>';buildTicks(document.getElementById('ticks-r1'));buildNums(document.getElementById('nums-r1'),'num');buildNums24h(document.getElementById('nums-24-r1'));r1.q=0;r1.aciertos=0;mostrarPreguntaR1();}else{r2.q=0;r2.aciertos=0;initReto2();}};
+function celebrate(){var colors=['#a02818','#4a7048','#b8893f','#d94a2c','#f4d896'];for(var i=0;i<18;i++){(function(){var c=document.createElement('div');c.className='confetti';c.style.left=(Math.random()*100)+'vw';c.style.bottom='0';c.style.background=colors[Math.floor(Math.random()*colors.length)];c.style.borderRadius=Math.random()>.5?'50%':'2px';c.style.animationDelay=(Math.random()*.3)+'s';c.style.animationDuration=(2+Math.random())+'s';document.body.appendChild(c);setTimeout(function(){if(c.parentNode)c.parentNode.removeChild(c);},3000);})();}}
 document.getElementById('pill').style.left='4px';
-
+document.getElementById('pill24').style.left='4px';
 })();
-
-window.switchTab = window.showTab;
+window.switchTab=window.showTab;
 </script>
+
+<script>
+(function(){window.MB=window.MB||{};var ctx=null;function getCtx(){if(!ctx)ctx=new(window.AudioContext||window.webkitAudioContext)();return ctx;}function playTone(freq,type,start,duration,gainVal,ac){var o=ac.createOscillator();var g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=type;o.frequency.setValueAtTime(freq,start);g.gain.setValueAtTime(gainVal,start);g.gain.exponentialRampToValueAtTime(0.001,start+duration);o.start(start);o.stop(start+duration);}window.MB.soundOk=function(){try{var ac=getCtx();var t=ac.currentTime;playTone(523,'sine',t,0.18,0.03,ac);playTone(659,'sine',t+0.1,0.18,0.03,ac);playTone(784,'sine',t+0.2,0.28,0.03,ac);playTone(1047,'sine',t+0.22,0.22,0.02,ac);}catch(e){}};window.MB.soundErr=function(){try{var ac=getCtx();var t=ac.currentTime;playTone(220,'sawtooth',t,0.18,0.02,ac);playTone(180,'sawtooth',t+0.15,0.25,0.02,ac);}catch(e){}}; })();
+</script>
+
 </body>
 </html>
